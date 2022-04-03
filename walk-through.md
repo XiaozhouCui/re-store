@@ -15,9 +15,10 @@
 
 ### Test the newly created API project
 
-- cd into `./API` folder and then run `dotnet run`
-- A web server should be running on _https://localhost:5001_
-- We should be able to open swagger at _https://localhost:5001/swagger/index.html_
+- Update _./API/Properties/launchSettings.json_, set `"applicationUrl": "http://localhost:5000",`
+- cd into _./API_ folder and then run `dotnet watch run`
+- A web server should be running on _http://localhost:5000_
+- We should be able to open swagger at _http://localhost:5000/swagger/index.html_
 
 ### VS Code extensions
 
@@ -30,4 +31,5 @@
 
 ### Trouble shooting
 
-- If see _Unable to configure HTTPS endpoint. No server certificate was specified_ in terminal, run `dotnet dev-certs https --trust`
+- If see HTTPS issues in terminal, run `dotnet dev-certs https --trust`
+- Alternatively, update the _./API/Properties/launchSettings.json_, and remove `https://localhost:5001` from `applicationUrl` (only use http)

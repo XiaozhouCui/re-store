@@ -13,6 +13,7 @@ namespace API
     {
         public static void Main(string[] args)
         {
+            // Create Kestrel server
             CreateHostBuilder(args).Build().Run();
         }
 
@@ -20,6 +21,7 @@ namespace API
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    // use Startup class for additional configuration and services
                     webBuilder.UseStartup<Startup>();
                 });
     }

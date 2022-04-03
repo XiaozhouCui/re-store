@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace API.Controllers
 {
     [ApiController]
+    // "[controller]" is placeholder for name of controller minus the "Controller" at the end (e.g. WeatherForecastController => localhost:5000/WeatherForecast)
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
@@ -23,7 +24,7 @@ namespace API.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
+        [HttpGet] // attribute for GET request
         public IEnumerable<WeatherForecast> Get()
         {
             var rng = new Random();

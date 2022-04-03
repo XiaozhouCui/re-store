@@ -16,6 +16,7 @@ namespace API
 {
     public class Startup
     {
+        // Construtor: inject configuration from appsettings.json (e.g. DB connection string)
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -23,7 +24,7 @@ namespace API
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        // This method gets called by the runtime. Use this method to add services to the container. (Dependency Injection Container)
         public void ConfigureServices(IServiceCollection services)
         {
 
@@ -34,7 +35,7 @@ namespace API
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline. (Middleware)
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -44,7 +45,7 @@ namespace API
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
             }
 
-            app.UseHttpsRedirection();
+            // app.UseHttpsRedirection(); // not using HTTPS in dev mode
 
             app.UseRouting();
 

@@ -38,7 +38,27 @@
 
 ### Create a new C# class for the Product entity
 
-- Create a new folder _Entities_
+- Create a new folder _./API/Entities_
 - Right click Entities folder and select new C# class (need C# Extensions installed in VS Code). Name it `Product`
 - Inside Product class, type `prop` then hit Tab, it will auto generate a property with public getter and setter. Name it `Id`
 - In the same way, add other properties such as `Name` and `Description` etc.
+
+### Install Entity Framework with NuGet gallery
+
+- In VS Code, press `ctrl + shift + p` and type "nuget", then select `Open NuGet Gallery`
+- Inside NuGet Gallery, find `Microsoft.EntityFrameworkCore.Sqlite`, tick `API.csproj` and click **Install**
+- To avoid compatibility errors, make sure the Sqlite package version is V5 if using .NET 5. (Use Sqlite V6 for .NET 6)
+- Repeat for package `Microsoft.EntityFrameworkCore.Design`, this package is for running Migration
+
+### Setup Database Context class using EF
+
+- Create a new folder _./API/Data_, inside folder, create a new class _StoreContext.cs_
+- Update the StoreContext class so that it is derived from `DbContext` class in EF
+- Create a constructor to pass in options. Options such as DB connection string will be passed in from _Startup.cs_
+- Create a new `DbSet<entity>` type of property for each entity, property name will be table name (e.g. "Products" table)
+
+### Add DbContext to the Startup class as a service (Dependency Injection)
+
+- In _appsettings.Development.json_, add connection string for SQLite: `Data source=store.db`
+- Go to _Startup.cs_, auto delete unused imports by `ctrl + .` and select `Remove Unnecessary Usings`.
+- Inside `ConfigureServices` method, add the StoreContext, passing in option for DB connection string (for SQLite in dev)

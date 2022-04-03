@@ -19,6 +19,15 @@
 - A web server should be running on _https://localhost:5001_
 - We should be able to open swagger at _https://localhost:5001/swagger/index.html_
 
+### VS Code extensions
+
+- C#
+- C# Extensions (JosKreativ): right click folder to create classes
+- Auto Rename Tag: rename paired HTML/XML tags
+- Bracket Pair Colorizer 2
+- NuGet Gallery
+- SQLite
+
 ### Trouble shooting
 
 - If see _Unable to configure HTTPS endpoint. No server certificate was specified_ in terminal, run `dotnet dev-certs https --trust`

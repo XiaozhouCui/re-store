@@ -33,3 +33,12 @@
 
 - If see HTTPS issues in terminal, run `dotnet dev-certs https --trust`
 - Alternatively, update the _./API/Properties/launchSettings.json_, and remove `https://localhost:5001` from `applicationUrl` (only use http)
+
+## Start building the API
+
+### Create a new C# class for the Product entity
+
+- Create a new folder _Entities_
+- Right click Entities folder and select new C# class (need C# Extensions installed in VS Code). Name it `Product`
+- Inside Product class, type `prop` then hit Tab, it will auto generate a property with public getter and setter. Name it `Id`
+- In the same way, add other properties such as `Name` and `Description` etc.

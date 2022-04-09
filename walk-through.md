@@ -62,3 +62,18 @@
 - In _appsettings.Development.json_, add connection string for SQLite: `Data source=store.db`
 - Go to _Startup.cs_, auto delete unused imports by `ctrl + .` and select `Remove Unnecessary Usings`.
 - Inside `ConfigureServices` method, add the StoreContext, passing in option for DB connection string (for SQLite in dev)
+
+### Install CLI tool "dotnet-ef"
+
+- Goto to the webpage for [dotnet-ef](https://nuget.org/packages/dotnet-ef), this is a tool for the dotnet SDK (CLI)
+- In CLI, enter `dotnet tool install --global dotnet-ef --version 5.0.8`
+- If see error "already installed", enter `dotnet tool list -g` to check the installed packages and versions
+- To update the version of dotnet-ef, run `dotnet tool update --global dotnet-ef --version 5.0.8`
+- To check the installed tool, run `dotnet ef`
+
+### Creating an Entity Framework Migration
+
+- Go to API folder, run `dotnet ef migrations add InitialCreate -o Data/Migrations`, this will create migration files inside folder _./API/Data/Migrations_
+- The `Up()` method in migration file _timestamp-InitialCreate.cs_, a database will be created with a table "Products"
+- To run the migration files, run `dotnet ef database update` from API folder. This will create database (store.db) if not created yet
+- Use vscode SQLite extension to check the newly created database: `ctrl + shift + p` > Open store.db with SQLite > left bar SQLite explorer

@@ -77,3 +77,11 @@
 - Running the `Up()` method in migration file _timestamp-InitialCreate.cs_, a database will be created with a table "Products"
 - To run the migration files, run `dotnet ef database update` from API folder. This will create database (store.db) if not created yet
 - Use vscode SQLite extension to check the newly created database: `ctrl + shift + p` > Open store.db with SQLite > left bar SQLite explorer
+
+### Programatically create database instead of CLI
+
+- Create class _DbInitializer.cs_ for seed data
+- Add the scoped migration service into `Main()` method
+- Delete the existing database, goto API folder and run `dotnet ef database drop`
+- Once _store.db_ is deleted, run `dotnet watch run`
+- The store.db should be re-created and seeded

@@ -22,7 +22,7 @@
 
 ### VS Code extensions
 
-- C#
+- C# (In settings, manually check `Omnisharp: Enable Import Completion`)
 - C# Extensions (JosKreativ): right click folder to create classes
 - Auto Rename Tag: rename paired HTML/XML tags
 - Bracket Pair Colorizer 2
@@ -74,6 +74,6 @@
 ### Creating an Entity Framework Migration
 
 - Go to API folder, run `dotnet ef migrations add InitialCreate -o Data/Migrations`, this will create migration files inside folder _./API/Data/Migrations_
-- The `Up()` method in migration file _timestamp-InitialCreate.cs_, a database will be created with a table "Products"
+- Running the `Up()` method in migration file _timestamp-InitialCreate.cs_, a database will be created with a table "Products"
 - To run the migration files, run `dotnet ef database update` from API folder. This will create database (store.db) if not created yet
 - Use vscode SQLite extension to check the newly created database: `ctrl + shift + p` > Open store.db with SQLite > left bar SQLite explorer

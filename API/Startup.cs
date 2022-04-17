@@ -34,9 +34,12 @@ namespace API
                 // pass in option for SQLite connection string
                 opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
+            // Add CORS
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline. (Middleware)
+        // The ORDER of middlewares is very important
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -49,6 +52,11 @@ namespace API
             // app.UseHttpsRedirection(); // not using HTTPS in dev mode
 
             app.UseRouting();
+            // CORS middleware must come after UseRouting()
+            app.UseCors(opt =>
+            {
+                opt.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000");
+            });
 
             app.UseAuthorization();
 

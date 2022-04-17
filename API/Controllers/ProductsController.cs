@@ -1,10 +1,9 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -20,16 +19,15 @@ namespace API.Controllers
 
         // Get a list of products
         [HttpGet]
-        public ActionResult<List<Product>> GetProducts()
+        public async Task<ActionResult<List<Product>>> GetProducts()
         {
-            var products = _context.Products.ToList();
-            return Ok(products);
+            return await _context.Products.ToListAsync();
         }
         // Get product by ID
         [HttpGet("{id}")] // api/products/3
-        public ActionResult<Product> GetProduct(int id)
+        public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            return _context.Products.Find(id);
+            return await _context.Products.FindAsync(id);
         }
     }
 }

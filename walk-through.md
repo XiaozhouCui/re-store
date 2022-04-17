@@ -85,3 +85,16 @@
 - Delete the existing database: goto API folder and run `dotnet ef database drop`
 - Once _store.db_ is deleted, run `dotnet watch run`
 - The store.db should be re-created and seeded
+
+## Start building the frontend
+
+### Setup React
+
+- Use CRA to create the project `npx creat-react-app client --template typescript --use-npm`
+
+### Setup Material UI
+
+- Run `npm install @mui/material @emotion/react @emotion/styled`
+- Add Roboto font by adding the link element (stylesheet) into index.html
+- Add pre-built SVG icons: `npm install @mui/icons-material`
+- Copy folder "images" from course assets into public folder

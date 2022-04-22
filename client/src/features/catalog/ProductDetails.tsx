@@ -7,11 +7,11 @@ import {
   TableContainer,
   TableRow,
   Typography,
-} from '@mui/material';
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import agent from '../../app/api/agent';
-import { Product } from '../../app/models/product';
+} from "@mui/material";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import agent from "../../app/api/agent";
+import { Product } from "../../app/models/product";
 
 export default function ProductDetails() {
   // grab product ID from url /catalog/:id
@@ -22,7 +22,7 @@ export default function ProductDetails() {
   useEffect(() => {
     agent.Catalog.details(parseInt(id))
       .then((response) => setProduct(response))
-      .catch((error) => console.log(error))
+      .catch((error) => console.log(error.response))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -36,7 +36,7 @@ export default function ProductDetails() {
         <img
           src={product.pictureUrl}
           alt={product.name}
-          style={{ width: '100%' }}
+          style={{ width: "100%" }}
         />
       </Grid>
       <Grid item xs={6}>

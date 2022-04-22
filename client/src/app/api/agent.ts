@@ -15,6 +15,18 @@ axios.interceptors.response.use(
     const { data, status } = error.response!;
     switch (status) {
       case 400:
+        // check if 400 is a form validation error
+        if (data.errors) {
+          const modelStateErrors: string[] = [];
+          for (const key in data.errors) {
+            if (data.errors[key]) {
+              modelStateErrors.push(data.errors[key]);
+            }
+          }
+          // will be caught in the component
+          throw modelStateErrors.flat();
+        }
+        // for other 400 errors
         toast.error(data.title);
         break;
       case 401:

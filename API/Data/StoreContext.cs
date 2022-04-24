@@ -13,5 +13,8 @@ namespace API.Data
 
         // For each entity, create a DbSet (table)
         public DbSet<Product> Products { get; set; } // "Products" is table's name
+        
+        // Basket table
+        public DbSet<Basket> Baskets { get; set; }
     }
 }

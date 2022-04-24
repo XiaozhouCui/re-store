@@ -98,3 +98,15 @@
 - Add Roboto font by adding the link element (stylesheet) into index.html
 - Add pre-built SVG icons: `npm install @mui/icons-material`
 - Copy folder "images" from course assets into public folder
+
+## Shopping cart feature
+
+### Creating the Basket entity and BasketItem entity
+
+- Create the Basket entity class
+- Make sure CLI tool **dotnet-ef** is installed globally
+- Run migration: `dotnet ef migrations add BasketEntityAdded`
+- Check the migration files, make sure the relationships reflects the business model, if not then remove the migration
+- To remove the previous migration, run `dotnet ef migrations remove`
+- Once the migration files are generated, run `dotnet watch run` to apply the migration
+- Once migration is done, the SQLite database should have 2 new tables: **Baskets**, **BasketItems**

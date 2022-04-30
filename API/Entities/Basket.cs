@@ -10,9 +10,9 @@ namespace API.Entities
         public int Id { get; set; }
         public string BuyerId { get; set; }
 
-        // always initialise a new list when a basket is created, can be an empty List
+        // always initialise a new list when a basket is created, can be an empty List (1-to-many-or-0)
         public List<BasketItem> Items { get; set; } = new List<BasketItem>();
-        
+
         // method for adding item
         public void AddItem(Product product, int quantity)
         {
@@ -20,7 +20,7 @@ namespace API.Entities
             if (Items.All(item => item.ProductId != product.Id))
             {
                 // if product not in the list, add the BasketItem object
-                Items.Add(new BasketItem{Product = product, Quantity = quantity});
+                Items.Add(new BasketItem { Product = product, Quantity = quantity });
             }
 
             // adjust the quantity if the item is already in the basket

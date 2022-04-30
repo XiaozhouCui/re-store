@@ -107,6 +107,7 @@
 - Make sure CLI tool **dotnet-ef** is installed globally
 - Run migration: `dotnet ef migrations add BasketEntityAdded`
 - Check the migration files, make sure the relationships reflects the business model, if not then remove the migration
+- Make sure the relationship in entity classes (e.g. 1-to-many) are setup on both ends
 - To remove the previous migration, run `dotnet ef migrations remove`
 - Once the migration files are generated, run `dotnet watch run` to apply the migration
 - Once migration is done, the SQLite database should have 2 new tables: **Baskets**, **BasketItems**

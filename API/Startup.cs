@@ -59,7 +59,11 @@ namespace API
             // CORS middleware must come after UseRouting()
             app.UseCors(opt =>
             {
-                opt.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000");
+                opt
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials() // pass cookies to/from client
+                    .WithOrigins("http://localhost:3000");
             });
 
             app.UseAuthorization();

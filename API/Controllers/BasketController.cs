@@ -66,9 +66,14 @@ namespace API.Controllers
         public async Task<ActionResult> RemoveBasketItem(int productId, int quantity)
         {
             // get basket
+            var basket = await RetrieveBasket();
+            if (basket == null) return NotFound();
             // remove item or reduce quantity
+            basket.RemoveItem(productId, quantity);
             // save changes
-            return Ok();
+            var result = await _context.SaveChangesAsync() > 0;
+            if (result) return Ok();
+            return BadRequest(new ProblemDetails { Title = "Problem removing item from the basket" });
         }
 
         // re-usable local method to retireve basket (can return null)

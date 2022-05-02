@@ -39,7 +39,7 @@ axios.interceptors.response.use(
         toast.error(data.title);
         break;
       case 500:
-        // pass data to ServerError component as props "location"
+        // pass data to ServerError component as props "history/location"
         history.push({
           pathname: "/server-error",
           state: { error: data },
@@ -75,7 +75,7 @@ const TestErrors = {
 };
 
 const Basket = {
-  // cookies "buyerId" included in req
+  // cookies "buyerId" included in req and res
   get: () => requests.get("basket"),
   addItem: (productId: number, quantity = 1) => requests.post(`basket?productId=${productId}&quantity=${quantity}`, {}),
   removeItem: (productId: number, quantity = 1) => requests.delete(`basket?productId=${productId}&quantity=${quantity}`),

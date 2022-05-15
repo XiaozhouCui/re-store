@@ -18,22 +18,31 @@ import { useStoreContext } from '../../app/context/StoreContex';
 const BasketPage = () => {
   // basket is fetched on app initialisation
   const { basket, setBasket, removeItem } = useStoreContext();
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false); // this will set all buttons to spinner
+  const [status, setStatus] = useState({
+    loading: false,
+    name: '',
+  });
 
-  const handleAddItem = (productId: number) => {
-    setLoading(true);
+  const handleAddItem = (productId: number, name: string) => {
+    // setLoading(true);
+    setStatus({ 
+      loading: true,
+      name // with unique "name" property, spinner can target individual buttons
+    });
     agent.Basket.addItem(productId)
       .then((basket) => setBasket(basket))
       .catch((error) => console.log(error))
-      .finally(() => setLoading(false));
+      .finally(() => setStatus({ loading: false, name: '' }));
   };
 
-  const handleRemoveItem = (productId: number, quantity = 1) => {
-    setLoading(true);
+  const handleRemoveItem = (productId: number, quantity = 1, name: string) => {
+    // setLoading(true);
+    setStatus({ loading: true, name });
     agent.Basket.removeItem(productId, quantity)
       .then(() => removeItem(productId, quantity))
       .catch((error) => console.log(error))
-      .finally(() => setLoading(false));
+      .finally(() => setStatus({ loading: false, name: '' }));
   };
 
   if (!basket)
@@ -72,16 +81,16 @@ const BasketPage = () => {
               </TableCell>
               <TableCell align="center">
                 <LoadingButton
-                  loading={loading}
-                  onClick={() => handleRemoveItem(item.productId)}
+                  loading={status.loading && status.name === "deduct" + item.productId}
+                  onClick={() => handleRemoveItem(item.productId, 1, "deduct" + item.productId)}
                   color="error"
                 >
                   <Remove />
                 </LoadingButton>
                 {item.quantity}
                 <LoadingButton
-                  loading={loading}
-                  onClick={() => handleAddItem(item.productId)}
+                  loading={status.loading && status.name === "add" + item.productId}
+                  onClick={() => handleAddItem(item.productId, "add" + item.productId)}
                   color="secondary"
                 >
                   <Add />
@@ -92,10 +101,8 @@ const BasketPage = () => {
               </TableCell>
               <TableCell align="right">
                 <LoadingButton
-                  loading={loading}
-                  onClick={() =>
-                    handleRemoveItem(item.productId, item.quantity)
-                  }
+                  loading={status.loading && status.name === "delete" + item.productId}
+                  onClick={() => handleRemoveItem(item.productId, item.quantity, "delete" + item.productId)}
                   color="error"
                 >
                   <Delete />

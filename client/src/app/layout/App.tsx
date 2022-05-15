@@ -32,6 +32,8 @@ function App() {
         .then((basket) => setBasket(basket))
         .catch((error) => console.log(error))
         .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
   }, [setBasket]);
 

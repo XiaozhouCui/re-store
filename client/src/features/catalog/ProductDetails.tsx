@@ -20,7 +20,7 @@ import { Product } from '../../app/models/product';
 import { currencyFormat } from '../../app/util/util';
 
 export default function ProductDetails() {
-  const { basket } = useStoreContext();
+  const { basket, setBasket, removeItem } = useStoreContext();
   // grab product ID from url /catalog/:id
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
@@ -38,6 +38,33 @@ export default function ProductDetails() {
       .catch((error) => console.log(error))
       .finally(() => setLoading(false));
   }, [id, item]);
+
+  const handleInputChange = (event: any) => {
+    // quantity should not be less than 0
+    if (event.target.value >= 0) {
+      setQuantity(parseInt(event.target.value));
+    }
+  };
+
+  const handleUpdateCart = () => {
+    setSubmitting(true);
+    // check if we are adding or removing item
+    if (!item || quantity > item.quantity) {
+      // check if adding a new item or increase number of existing item in basket
+      const updatedQuantity = item ? quantity - item.quantity : quantity;
+      agent.Basket.addItem(product?.id!, updatedQuantity)
+        .then((basket) => setBasket(basket))
+        .catch((error) => console.log(error))
+        .finally(() => setSubmitting(false));
+    } else {
+      // removing item
+      const updatedQuantity = item.quantity - quantity;
+      agent.Basket.removeItem(product?.id!, updatedQuantity)
+        .then(() => removeItem(product?.id!, updatedQuantity))
+        .catch((error) => console.log(error))
+        .finally(() => setSubmitting(false));
+    }
+  };
 
   if (loading) return <LoadingComponent message="Loading product..." />;
 
@@ -92,10 +119,16 @@ export default function ProductDetails() {
               label="Quantity in Cart"
               fullWidth
               value={quantity}
+              onChange={handleInputChange}
             />
           </Grid>
           <Grid item xs={6}>
             <LoadingButton
+              loading={submitting}
+              disabled={
+                item?.quantity === quantity || (!item && quantity === 0)
+              }
+              onClick={handleUpdateCart}
               sx={{ height: '55px' }}
               color="primary"
               size="large"

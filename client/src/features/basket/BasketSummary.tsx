@@ -5,7 +5,6 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Typography,
 } from '@mui/material';
 import { useStoreContext } from '../../app/context/StoreContex';
 import { currencyFormat } from '../../app/util/util';

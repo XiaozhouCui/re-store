@@ -2,6 +2,7 @@ import { Add, Delete, Remove } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
+  Button,
   Grid,
   Paper,
   Table,
@@ -13,6 +14,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import agent from '../../app/api/agent';
 import { useStoreContext } from '../../app/context/StoreContex';
 import { currencyFormat } from '../../app/util/util';
@@ -143,6 +145,15 @@ const BasketPage = () => {
         <Grid item xs={6} />
         <Grid item xs={6}>
           <BasketSummary />
+          <Button
+            component={Link}
+            to="/checkout"
+            variant="contained"
+            size="large"
+            fullWidth
+          >
+            Checkout
+          </Button>
         </Grid>
       </Grid>
     </>

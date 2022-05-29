@@ -1,5 +1,13 @@
 import { Typography } from '@mui/material';
+import { useSelector } from 'react-redux';
+import { CounterState } from './counterReducer';
 
 export default function ContactPage() {
-  return <Typography variant="h2">Contact page</Typography>;
+  const { data, title } = useSelector((state: CounterState) => state);
+  return (
+    <>
+      <Typography variant="h2">{title}</Typography>
+      <Typography variant="h5">Data is: {data}</Typography>
+    </>
+  );
 }

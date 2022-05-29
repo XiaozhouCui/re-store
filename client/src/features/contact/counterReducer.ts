@@ -11,17 +11,33 @@ const initialState: CounterState = {
   title: 'YARC (yet another redux counter)',
 };
 
+// action creators: has payload
+export function increment(amount = 1) {
+  return {
+    type: INCREMENT_COUNTER,
+    payload: amount,
+  };
+}
+
+export function decrement(amount = 1) {
+  return {
+    type: DECREMENT_COUNTER,
+    payload: amount,
+  };
+}
+
+// reducer: pure function without side effects
 export default function counterReducer(state = initialState, action: any) {
   switch (action.type) {
     case INCREMENT_COUNTER:
       return {
         ...state,
-        data: state.data + 1,
+        data: state.data + action.payload,
       };
     case DECREMENT_COUNTER:
       return {
         ...state,
-        data: state.data - 1,
+        data: state.data - action.payload,
       };
     default:
       return state;

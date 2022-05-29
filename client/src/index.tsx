@@ -7,9 +7,10 @@ import { Router } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 import { StoreProvider } from './app/context/StoreContex';
 import { Provider } from 'react-redux';
-import { configureStore } from './app/store/configureStore';
+import { store } from './app/store/configureStore';
+// import { configureStore } from './app/store/configureStore';
 
-const store = configureStore();
+// const store = configureStore();
 
 export const history = createBrowserHistory();
 

@@ -13,6 +13,7 @@ export const basketSlice = createSlice({
   name: 'basket',
   initialState,
   reducers: {
+    // actions have the same name as reducers, but only have 1 arg for payload
     setBasket: (state, action) => {
       state.basket = action.payload;
     },
@@ -32,4 +33,5 @@ export const basketSlice = createSlice({
   },
 });
 
+// exported setBasket and removeItem only have 1 argument which is the payload of action
 export const { setBasket, removeItem } = basketSlice.actions;

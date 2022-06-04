@@ -11,7 +11,8 @@ import {
   Typography,
 } from '@mui/material';
 import { Link, NavLink } from 'react-router-dom';
-import { useStoreContext } from '../context/StoreContex';
+import { useAppSelector } from '../store/configureStore';
+// import { useStoreContext } from '../context/StoreContex';
 
 interface Props {
   darkMode: boolean;
@@ -39,7 +40,8 @@ const navStyles = {
 
 export default function Header({ darkMode, handleThemeChange }: Props) {
   // basket is fetched on app initialisation
-  const { basket } = useStoreContext();
+  // const { basket } = useStoreContext();
+  const { basket } = useAppSelector((state) => state.basket);
   // get the total number of items in basket, to show in badge
   const itemCount = basket?.items.reduce((sum, item) => sum + item.quantity, 0);
 

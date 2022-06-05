@@ -57,8 +57,8 @@ export const catalogSlice = createSlice({
       state.productsLoaded = true; // no need to re-fetch products everytime
     });
     builder.addCase(fetchProductsAsync.rejected, (state, action) => {
-      console.log(action.payload);
       state.status = 'idle';
+      console.log(action.payload);
     });
     builder.addCase(fetchProductAsync.pending, (state) => {
       state.status = 'pendingFetchProduct';
@@ -69,8 +69,8 @@ export const catalogSlice = createSlice({
       state.status = 'idle';
     });
     builder.addCase(fetchProductAsync.rejected, (state, action) => {
-      console.log(action);
       state.status = 'idle';
+      console.log(action.payload);
     });
   },
 });

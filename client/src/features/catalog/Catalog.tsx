@@ -6,7 +6,7 @@ import ProductList from './ProductList';
 
 export default function Catalog() {
   // get NORMALIZED products by using createEntityAdapter from redux-toolkit
-  const products = useAppSelector(productSelectors.selectAll); // productSelectors is for state.catalog
+  const products = useAppSelector(productSelectors.selectAll); // productSelectors has all the useful methods
   const { productsLoaded, status } = useAppSelector((state) => state.catalog);
   const dispatch = useAppDispatch();
 

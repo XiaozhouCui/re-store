@@ -12,24 +12,26 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import agent from '../../app/api/agent';
 import NotFound from '../../app/errors/NotFound';
 import LoadingComponent from '../../app/layout/LoadingComponent';
-import { Product } from '../../app/models/product';
 import { useAppDispatch, useAppSelector } from '../../app/store/configureStore';
 import { currencyFormat } from '../../app/util/util';
 import {
   addBasketItemAsync,
   removeBasketItemAsync,
 } from '../basket/basketSlice';
+import { fetchProductAsync, productSelectors } from './catalogSlice';
 
 export default function ProductDetails() {
   const { basket, status } = useAppSelector((state) => state.basket);
+  const { status: productStatus } = useAppSelector((state) => state.catalog);
   const dispatch = useAppDispatch();
   // grab product ID from url /catalog/:id
   const { id } = useParams<{ id: string }>();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const product = useAppSelector((state) =>
+    // productSelectors is the normalized products, and has all the useful methods
+    productSelectors.selectById(state, id)
+  );
   const [quantity, setQuantity] = useState<number>(0);
   // check if we have the current item in basket
   const item = basket?.items.find((i) => i.productId === product?.id);
@@ -37,11 +39,8 @@ export default function ProductDetails() {
   useEffect(() => {
     // if current item is in basket, store its quantity into state
     if (item) setQuantity(item.quantity);
-    agent.Catalog.details(parseInt(id))
-      .then((response) => setProduct(response))
-      .catch((error) => console.log(error))
-      .finally(() => setLoading(false));
-  }, [id, item]);
+    if (!product) dispatch(fetchProductAsync(parseInt(id)));
+  }, [dispatch, id, item, product]);
 
   const handleInputChange = (event: any) => {
     // quantity should not be less than 0
@@ -73,7 +72,8 @@ export default function ProductDetails() {
     }
   };
 
-  if (loading) return <LoadingComponent message="Loading product..." />;
+  if (productStatus.includes('pending'))
+    return <LoadingComponent message="Loading product..." />;
 
   if (!product) return <NotFound />;
 

@@ -5,8 +5,9 @@ import {
 } from '@reduxjs/toolkit';
 import agent from '../../app/api/agent';
 import { Product } from '../../app/models/product';
+import { RootState } from '../../app/store/configureStore';
 
-// use createEntityAdapter to normalize data (products): { ids: [], entities: {} }
+// use createEntityAdapter to NORMALIZE data (products): { ids: [], entities: {} }
 // https://redux-toolkit.js.org/usage/usage-guide#managing-normalized-data
 
 const productsAdapter = createEntityAdapter<Product>();
@@ -38,10 +39,14 @@ export const catalogSlice = createSlice({
       // productsAdapter will have all the methods to work on products array
       productsAdapter.setAll(state, action.payload); // payload contains list of products
       state.status = 'idle';
-      state.productsLoaded = true;
+      state.productsLoaded = true; // no need to re-fetch products everytime
     });
     builder.addCase(fetchProductsAsync.rejected, (state) => {
       state.status = 'idle';
     });
   },
 });
+
+export const productSelectors = productsAdapter.getSelectors(
+  (state: RootState) => state.catalog
+);

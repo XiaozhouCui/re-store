@@ -13,11 +13,11 @@ const initialState: BasketState = {
 };
 
 // async functions from redux-toolkit, action creators
-// create item will return a Basket
+// add item function will return a Basket obj
 export const addBasketItemAsync = createAsyncThunk<
   Basket,
-  { productId: number; quantity: number }
->('basket/addBasketItemAsync', async ({ productId, quantity }) => {
+  { productId: number; quantity?: number }
+>('basket/addBasketItemAsync', async ({ productId, quantity = 1 }) => {
   try {
     return await agent.Basket.addItem(productId, quantity);
   } catch (error) {
@@ -29,7 +29,7 @@ export const basketSlice = createSlice({
   name: 'basket',
   initialState,
   reducers: {
-    // actions have the same name as reducers, but only have 1 arg for payload
+    // action creators have the same name as reducers, but only have 1 arg for payload
     setBasket: (state, action) => {
       state.basket = action.payload;
     },
@@ -49,8 +49,8 @@ export const basketSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(addBasketItemAsync.pending, (state, action) => {
-      console.log(action);
-      state.status = 'pendingAddItem';
+      // action.payload will be undefined when pending
+      state.status = 'pendingAddItem' + action.meta.arg.productId; // append productId, so that not all items have spinners
     });
     builder.addCase(addBasketItemAsync.fulfilled, (state, action) => {
       // payload is of type Basket, because addBasketItemAsync will return a Basket

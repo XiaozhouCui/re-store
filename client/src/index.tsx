@@ -7,21 +7,18 @@ import { Router } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 import { Provider } from 'react-redux';
 import { store } from './app/store/configureStore';
-// import { StoreProvider } from './app/context/StoreContex';
-// import { configureStore } from './app/store/configureStore';
-
-// const store = configureStore();
+import { fetchProductsAsync } from './features/catalog/catalogSlice';
 
 export const history = createBrowserHistory();
+
+store.dispatch(fetchProductsAsync());
 
 ReactDOM.render(
   <React.StrictMode>
     <Router history={history}>
-      {/* <StoreProvider> */}
       <Provider store={store}>
         <App />
       </Provider>
-      {/* </StoreProvider> */}
     </Router>
   </React.StrictMode>,
   document.getElementById('root')

@@ -18,19 +18,19 @@ import LoadingComponent from '../../app/layout/LoadingComponent';
 import { Product } from '../../app/models/product';
 import { useAppDispatch, useAppSelector } from '../../app/store/configureStore';
 import { currencyFormat } from '../../app/util/util';
-import { removeItem, setBasket } from '../basket/basketSlice';
-// import { useStoreContext } from '../../app/context/StoreContex';
+import {
+  addBasketItemAsync,
+  removeBasketItemAsync,
+} from '../basket/basketSlice';
 
 export default function ProductDetails() {
-  // const { basket, setBasket, removeItem } = useStoreContext();
-  const { basket } = useAppSelector((state) => state.basket);
+  const { basket, status } = useAppSelector((state) => state.basket);
   const dispatch = useAppDispatch();
   // grab product ID from url /catalog/:id
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [quantity, setQuantity] = useState<number>(0);
-  const [submitting, setSubmitting] = useState<boolean>(false);
   // check if we have the current item in basket
   const item = basket?.items.find((i) => i.productId === product?.id);
 
@@ -51,24 +51,25 @@ export default function ProductDetails() {
   };
 
   const handleUpdateCart = () => {
-    setSubmitting(true);
     // check if we are adding or removing item
     if (!item || quantity > item.quantity) {
       // check if adding a new item or increase number of existing item in basket
       const updatedQuantity = item ? quantity - item.quantity : quantity;
-      agent.Basket.addItem(product?.id!, updatedQuantity)
-        .then((basket) => dispatch(setBasket(basket)))
-        .catch((error) => console.log(error))
-        .finally(() => setSubmitting(false));
+      dispatch(
+        addBasketItemAsync({
+          productId: product?.id!,
+          quantity: updatedQuantity,
+        })
+      );
     } else {
       // removing item
       const updatedQuantity = item.quantity - quantity;
-      agent.Basket.removeItem(product?.id!, updatedQuantity)
-        .then(() =>
-          dispatch(removeItem({ productId: product?.id!, quantity: updatedQuantity }))
-        )
-        .catch((error) => console.log(error))
-        .finally(() => setSubmitting(false));
+      dispatch(
+        removeBasketItemAsync({
+          productId: product?.id!,
+          quantity: updatedQuantity,
+        })
+      );
     }
   };
 
@@ -130,7 +131,7 @@ export default function ProductDetails() {
           </Grid>
           <Grid item xs={6}>
             <LoadingButton
-              loading={submitting}
+              loading={status.includes('pending')}
               disabled={
                 item?.quantity === quantity || (!item && quantity === 0)
               }

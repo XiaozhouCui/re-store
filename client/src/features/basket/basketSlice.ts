@@ -13,6 +13,7 @@ const initialState: BasketState = {
 };
 
 // async functions from redux-toolkit, action creators
+
 // add item function will return a Basket obj
 export const addBasketItemAsync = createAsyncThunk<
   Basket,
@@ -25,6 +26,17 @@ export const addBasketItemAsync = createAsyncThunk<
   }
 });
 
+export const removeBasketItemAsync = createAsyncThunk<
+  void, // return void
+  { productId: number; quantity: number, name?: string }
+>('basket/removeBasketItemAsync', async ({ productId, quantity }) => {
+  try {
+    return await agent.Basket.removeItem(productId, quantity);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 export const basketSlice = createSlice({
   name: 'basket',
   initialState,
@@ -32,19 +44,6 @@ export const basketSlice = createSlice({
     // action creators have the same name as reducers, but only have 1 arg for payload
     setBasket: (state, action) => {
       state.basket = action.payload;
-    },
-    removeItem: (state, action) => {
-      const { productId, quantity } = action.payload;
-      const itemIndex = state.basket?.items.findIndex(
-        (i) => i.productId === productId
-      );
-      if (itemIndex === undefined || itemIndex === -1) return;
-      // reduce item quantity
-      state.basket!.items[itemIndex].quantity -= quantity;
-      // remove item from basket if quantity is reduced to 0
-      if (state.basket?.items[itemIndex].quantity === 0) {
-        state.basket.items.splice(itemIndex, 1);
-      }
     },
   },
   extraReducers: (builder) => {
@@ -60,8 +59,30 @@ export const basketSlice = createSlice({
     builder.addCase(addBasketItemAsync.rejected, (state) => {
       state.status = 'idle';
     });
+    builder.addCase(removeBasketItemAsync.pending, (state, action) => {
+      // action.meta.arg.name to target the button being clicked for spinner
+      state.status = 'pendingRemoveItem' + action.meta.arg.productId + action.meta.arg.name;
+    });
+    builder.addCase(removeBasketItemAsync.fulfilled, (state, action) => {
+      // action.meta.arg contains the productId and quantity (arg of removeBasketItemAsync)
+      const { productId, quantity } = action.meta.arg;
+      const itemIndex = state.basket?.items.findIndex(
+        (i) => i.productId === productId
+      );
+      if (itemIndex === undefined || itemIndex === -1) return;
+      // reduce item quantity
+      state.basket!.items[itemIndex].quantity -= quantity;
+      // remove item from basket if quantity is reduced to 0
+      if (state.basket?.items[itemIndex].quantity === 0) {
+        state.basket.items.splice(itemIndex, 1);
+      }
+      state.status = 'idle';
+    });
+    builder.addCase(removeBasketItemAsync.rejected, (state) => {
+      state.status = 'idle';
+    });
   },
 });
 
-// exported setBasket and removeItem only have 1 argument which is the payload of action
-export const { setBasket, removeItem } = basketSlice.actions;
+// exported setBasket only have 1 argument which is the payload of action
+export const { setBasket } = basketSlice.actions;

@@ -51,5 +51,17 @@ namespace API.Controllers
 
             return product;
         }
+        // get filter options for client to select and filter
+        [HttpGet("filters")]
+        // IActionResult will have all HTTP responses, e.g. NotFound(), OK()
+        public async Task<IActionResult> GetFilters()
+        {
+            // get lists of unique brands and types from Products table
+            var brands = await _context.Products.Select(p => p.Brand).Distinct().ToListAsync();
+            // e.g. "types": ["Boards","Boots","Gloves","Hats"]
+            var types = await _context.Products.Select(p => p.Type).Distinct().ToListAsync();
+            // return an anonymous object
+            return Ok(new { brands, types });
+        }
     }
 }

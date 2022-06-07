@@ -19,24 +19,25 @@ namespace API.Controllers
             _context = context;
         }
 
-        // Get a paginated list of products
+        // Get a paged list of products
+        // Attribute [FromQuery] tells API controller to get parameters from query string
         [HttpGet]
-        public async Task<ActionResult<PagedList<Product>>> GetProducts(ProductParams productParams)
+        public async Task<ActionResult<PagedList<Product>>> GetProducts([FromQuery] ProductParams productParams)
         {
             // return await _context.Products.ToListAsync(); // directly query db
-            // process data before querying db
+            // process query before executing it against db
             var query = _context.Products
                 .Sort(productParams.OrderBy) // .Sort() comes from custom extionsion ProductExtensions.cs
-                .Search(productParams.SearchTerm) // custom extionsion
-                .Filter(productParams.Brands, productParams.Types) // custom extionsion
-                .AsQueryable(); // convert query into IQueryable
+                .Search(productParams.SearchTerm) // .Search(): custom extionsion method for IQueryable
+                .Filter(productParams.Brands, productParams.Types) // .Filter(): custom extionsion method for IQueryable
+                .AsQueryable(); // convert into IQueryable
 
             // execute the query against database to get paged list of products
             // PageNumber and PageSize: pagination params from helper class PaginationParams
             var products = await PagedList<Product>.ToPagedList(query, productParams.PageNumber, productParams.PageSize);
 
-            // include meta data in the "Paginatin" header of response
-            Response.Headers.Add("Pagination", JsonSerializer.Serialize(products.MetaData));
+            // Custom extension: "AddPaginationHeader" is a custom method for HttpResponse, defined in HttpExtensions.cs
+            Response.AddPaginationHeader(products.MetaData);
 
             return products;
         }

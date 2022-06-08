@@ -1,13 +1,4 @@
-import {
-  Box,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  Grid,
-  Pagination,
-  Paper,
-  Typography,
-} from '@mui/material';
+import { Box, Grid, Pagination, Paper, Typography } from '@mui/material';
 import { useEffect } from 'react';
 import CheckboxButtons from '../../app/components/CheckboxButtons';
 import RadioButtonGroup from '../../app/components/RadioButtonGroup';

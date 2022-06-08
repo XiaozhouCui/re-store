@@ -4,6 +4,7 @@ import {
   createSlice,
 } from '@reduxjs/toolkit';
 import agent from '../../app/api/agent';
+import { Metadata } from '../../app/models/pagination';
 import { Product, ProductParams } from '../../app/models/product';
 import { RootState } from '../../app/store/configureStore';
 
@@ -14,6 +15,7 @@ interface CatalogState {
   brands: string[];
   types: string[];
   productParams: ProductParams;
+  metaData: Metadata | null;
 }
 
 // use createEntityAdapter to NORMALIZE data (products): { ids: [], entities: {} }
@@ -48,7 +50,10 @@ export const fetchProductsAsync = createAsyncThunk<
     // use thunkAPI to get params from redux state
     const params = getAxiosParams(thunkAPI.getState().catalog.productParams);
     try {
-      return await agent.Catalog.list(params);
+      const response = await agent.Catalog.list(params);
+      // update metadata in state
+      thunkAPI.dispatch(setMetaData(response.metaData));
+      return response.items;
     } catch (error: any) {
       // thunkAPI: make sure the error is not in the "fulfilled" case
       return thunkAPI.rejectWithValue({ error: error.data });
@@ -98,6 +103,7 @@ export const catalogSlice = createSlice({
     brands: [],
     types: [],
     productParams: initParams(),
+    metaData: null,
   }),
   reducers: {
     setProductParams: (state, action) => {
@@ -107,6 +113,9 @@ export const catalogSlice = createSlice({
     },
     resetProductParams: (state) => {
       state.productParams = initParams();
+    },
+    setMetaData: (state, action) => {
+      state.metaData = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -157,4 +166,5 @@ export const productSelectors = productsAdapter.getSelectors(
 );
 
 // export reducers as action creators
-export const { setProductParams, resetProductParams } = catalogSlice.actions;
+export const { setProductParams, resetProductParams, setMetaData } =
+  catalogSlice.actions;

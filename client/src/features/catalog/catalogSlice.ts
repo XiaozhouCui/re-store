@@ -21,13 +21,34 @@ interface CatalogState {
 
 const productsAdapter = createEntityAdapter<Product>();
 
+const getAxiosParams = (productParams: ProductParams) => {
+  const params = new URLSearchParams();
+  params.append('pageNumber', productParams.pageNumber.toString());
+  params.append('pageSize', productParams.pageSize.toString());
+  params.append('orderBy', productParams.orderBy);
+  // below params are optional
+  if (productParams.searchTerm)
+    params.append('searchTerm', productParams.searchTerm);
+  if (productParams.brands)
+    params.append('brands', productParams.brands.toString());
+  if (productParams.types)
+    params.append('types', productParams.types.toString());
+  return params;
+};
+
 // thunk: get a list of products
-export const fetchProductsAsync = createAsyncThunk<Product[]>(
+export const fetchProductsAsync = createAsyncThunk<
+  Product[],
+  void,
+  { state: RootState } // so that thunkAPI.getState() will know the state type
+>(
   'catalog/fetchProductsAsync',
   // "_" is equavalent to void
   async (_, thunkAPI) => {
+    // use thunkAPI to get params from redux state
+    const params = getAxiosParams(thunkAPI.getState().catalog.productParams);
     try {
-      return await agent.Catalog.list();
+      return await agent.Catalog.list(params);
     } catch (error: any) {
       // thunkAPI: make sure the error is not in the "fulfilled" case
       return thunkAPI.rejectWithValue({ error: error.data });

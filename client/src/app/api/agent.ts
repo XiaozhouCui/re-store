@@ -1,11 +1,11 @@
-import axios, { AxiosError, AxiosResponse } from "axios";
-import { toast } from "react-toastify";
-import { history } from "../..";
+import axios, { AxiosError, AxiosResponse } from 'axios';
+import { toast } from 'react-toastify';
+import { history } from '../..';
 
 const sleep = () => new Promise((resolve) => setTimeout(resolve, 500));
 
 // all requests url will be pre-fixed with this base url
-axios.defaults.baseURL = "http://localhost:5000/api/";
+axios.defaults.baseURL = 'http://localhost:5000/api/';
 // allow receive/set cookies in browser
 axios.defaults.withCredentials = true;
 
@@ -41,7 +41,7 @@ axios.interceptors.response.use(
       case 500:
         // pass data to ServerError component as props "history/location"
         history.push({
-          pathname: "/server-error",
+          pathname: '/server-error',
           state: { error: data },
         });
         break;
@@ -54,33 +54,37 @@ axios.interceptors.response.use(
 
 // centralise all requests
 const requests = {
-  get: (url: string) => axios.get(url).then(responseBody),
+  get: (url: string, params?: URLSearchParams) =>
+    axios.get(url, { params }).then(responseBody),
   post: (url: string, body: {}) => axios.post(url, body).then(responseBody),
   put: (url: string, body: {}) => axios.put(url, body).then(responseBody),
   delete: (url: string) => axios.delete(url).then(responseBody),
 };
 
 const Catalog = {
-  // get('products') is GET http://localhost:5000/api/products
-  list: () => requests.get("products"),
+  // get('products', params) is GET http://localhost:5000/api/products?pageNumber=1&pageSize=6&orderBy=name
+  list: (params: URLSearchParams) => requests.get('products', params),
   details: (id: number) => requests.get(`products/${id}`),
-  fetchFilters: () => requests.get("products/filters"),
+  // get filter options to be rendered
+  fetchFilters: () => requests.get('products/filters'),
 };
 
 const TestErrors = {
-  get400Error: () => requests.get("buggy/bad-request"),
-  get401Error: () => requests.get("buggy/unauthorised"),
-  get404Error: () => requests.get("buggy/not-found"),
-  get500Error: () => requests.get("buggy/server-error"),
-  getValidationError: () => requests.get("buggy/validation-error"),
+  get400Error: () => requests.get('buggy/bad-request'),
+  get401Error: () => requests.get('buggy/unauthorised'),
+  get404Error: () => requests.get('buggy/not-found'),
+  get500Error: () => requests.get('buggy/server-error'),
+  getValidationError: () => requests.get('buggy/validation-error'),
 };
 
 const Basket = {
   // cookies "buyerId" included in req and res
-  get: () => requests.get("basket"),
-  addItem: (productId: number, quantity = 1) => requests.post(`basket?productId=${productId}&quantity=${quantity}`, {}),
-  removeItem: (productId: number, quantity = 1) => requests.delete(`basket?productId=${productId}&quantity=${quantity}`),
-}
+  get: () => requests.get('basket'),
+  addItem: (productId: number, quantity = 1) =>
+    requests.post(`basket?productId=${productId}&quantity=${quantity}`, {}),
+  removeItem: (productId: number, quantity = 1) =>
+    requests.delete(`basket?productId=${productId}&quantity=${quantity}`),
+};
 
 const agent = {
   Catalog,

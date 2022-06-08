@@ -31,9 +31,9 @@ const getAxiosParams = (productParams: ProductParams) => {
   // below params are optional
   if (productParams.searchTerm)
     params.append('searchTerm', productParams.searchTerm);
-  if (productParams.brands)
+  if (productParams.brands.length > 0)
     params.append('brands', productParams.brands.toString());
-  if (productParams.types)
+  if (productParams.types.length > 0)
     params.append('types', productParams.types.toString());
   return params;
 };
@@ -91,6 +91,8 @@ const initParams = () => {
     pageNumber: 1,
     pageSize: 6,
     orderBy: 'name',
+    brands: [],
+    types: [],
   };
 };
 
@@ -107,7 +109,15 @@ export const catalogSlice = createSlice({
   }),
   reducers: {
     setProductParams: (state, action) => {
-      // force the useEffect hook to get products from API
+      // force the useEffect hook to re-fetch products from API
+      state.productsLoaded = false;
+      state.productParams = {
+        ...state.productParams,
+        ...action.payload, // overide a property, e.g. orderBy, brands, types etc.
+        pageNumber: 1, // set page to 1 when a filter is clicked
+      };
+    },
+    setPageNumber: (state, action) => {
       state.productsLoaded = false;
       state.productParams = { ...state.productParams, ...action.payload };
     },
@@ -166,5 +176,9 @@ export const productSelectors = productsAdapter.getSelectors(
 );
 
 // export reducers as action creators
-export const { setProductParams, resetProductParams, setMetaData } =
-  catalogSlice.actions;
+export const {
+  setProductParams,
+  resetProductParams,
+  setMetaData,
+  setPageNumber,
+} = catalogSlice.actions;

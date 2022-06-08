@@ -1,5 +1,6 @@
-import { Box, Grid, Pagination, Paper, Typography } from '@mui/material';
+import { Grid, Paper } from '@mui/material';
 import { useEffect } from 'react';
+import AppPagination from '../../app/components/AppPagination';
 import CheckboxButtons from '../../app/components/CheckboxButtons';
 import RadioButtonGroup from '../../app/components/RadioButtonGroup';
 import LoadingComponent from '../../app/layout/LoadingComponent';
@@ -29,6 +30,7 @@ export default function Catalog() {
     brands,
     types,
     productParams,
+    metaData,
   } = useAppSelector((state) => state.catalog);
   const dispatch = useAppDispatch();
   useEffect(() => {
@@ -40,7 +42,7 @@ export default function Catalog() {
     if (!filtersLoaded) dispatch(fetchFilters());
   }, [dispatch, filtersLoaded]);
 
-  if (status.includes('pending'))
+  if (status.includes('pending') || !metaData)
     return <LoadingComponent message="Loading products..." />;
 
   return (
@@ -82,10 +84,12 @@ export default function Catalog() {
       </Grid>
       <Grid item xs={3} />
       <Grid item xs={9}>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography>Displaying 1-6 of 20 items</Typography>
-          <Pagination color="secondary" size="large" count={10} page={2} />
-        </Box>
+        <AppPagination
+          metaData={metaData}
+          onPageChange={(page: number) =>
+            dispatch(setProductParams({ pageNumber: page }))
+          }
+        />
       </Grid>
     </Grid>
   );

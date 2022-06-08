@@ -64,6 +64,7 @@ const Catalog = {
   // get('products') is GET http://localhost:5000/api/products
   list: () => requests.get("products"),
   details: (id: number) => requests.get(`products/${id}`),
+  fetchFilters: () => requests.get("products/filters"),
 };
 
 const TestErrors = {

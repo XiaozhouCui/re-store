@@ -1,6 +1,7 @@
 using API.Data;
 using API.Entities;
 using API.Middleware;
+using API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -23,6 +24,7 @@ namespace API
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container. (Dependency Injection Container)
+        // The services in this method can be injected into other classes (e.g. controllers)
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
@@ -49,6 +51,8 @@ namespace API
             // add auth
             services.AddAuthentication();
             services.AddAuthorization();
+            // add JWT token service, so that it can be injected into account controller
+            services.AddScoped<TokenService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline. (Middleware)

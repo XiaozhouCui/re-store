@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using API.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 
 // Token Service will be injected
@@ -39,7 +37,7 @@ namespace API.Services
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
-            // create the key to sign and decrypt JWT
+            // create the key to sign and decrypt JWT, from appsettings.Development.json
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWTSettings:TokenKey"]));
             // create signing credential with the key
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);

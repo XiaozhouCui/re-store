@@ -1,5 +1,8 @@
+using System.Threading.Tasks;
 using API.Data;
+using API.Entities;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,7 +12,7 @@ namespace API
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             // Create Kestrel server
             var host = CreateHostBuilder(args).Build();
@@ -17,14 +20,16 @@ namespace API
             using var scope = host.Services.CreateScope();
             // Add services into scope
             var context = scope.ServiceProvider.GetRequiredService<StoreContext>();
+            // Get UserManager service
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
             // run scoped services in a try-catch block
             try
             {
                 // programatically run migration, instead of using CLI command `dotnet ef database update`
-                context.Database.Migrate();
+                await context.Database.MigrateAsync();
                 // pupulate database if no data found
-                DbInitializer.Initialize(context);
+                await DbInitializer.Initialize(context, userManager);
             }
             catch (System.Exception ex)
             {
@@ -32,7 +37,7 @@ namespace API
             }
 
             // run the server
-            host.Run();
+            await host.RunAsync();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

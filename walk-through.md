@@ -124,3 +124,11 @@
 - User class will derive from `IdentityUser`, then User will have all the useful properties (e.g. PasswordHash)
 - Update StoreContext, make sure it is now derived from `IdentityDbContext<User>`
 - Seed data into db by overiding the `OnModelCreating` method
+
+### Create identity tables and new users in migration
+
+- In Startup.cs, add config for auth and identity, which will create identity tables in db
+- In DbInitializer.cs, add 2 users: "admin" and "bob"
+- In Program.cs, modify the `Main` method to be async, and pass in userManager
+- Create migration: `dotnet ef migrations add IdentityAdded`
+- Re-run the app: `dotnet watch run`, this will create the tables in DB

@@ -23,7 +23,7 @@ namespace API.Data
         {
             // from IdentityDbContext class
             base.OnModelCreating(builder);
-            // add data into db when creating migrations
+            // add 2 roles into db when creating migrations
             builder.Entity<IdentityRole>()
                 .HasData(
                     new IdentityRole { Name = "Member", NormalizedName = "MEMBER" },

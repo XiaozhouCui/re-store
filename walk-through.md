@@ -111,3 +111,16 @@
 - To remove the previous migration, run `dotnet ef migrations remove`
 - Once the migration files are generated, run `dotnet watch run` to apply the migration
 - Once migration is done, the SQLite database should have 2 new tables: **Baskets**, **BasketItems**
+
+## Identity (login)
+
+### Install nuget packages
+- Go to Nuget Gallery, install **Microsoft.AspNetCore.Authentication.JwtBearer**
+- Also in Nuget, install **Microsoft.AspNetCore.Identity.EntityFrameworkCore**
+
+### Setup identity
+
+- Create a new entity class `User`, 
+- User class will derive from `IdentityUser`, then User will have all the useful properties (e.g. PasswordHash)
+- Update StoreContext, make sure it is now derived from `IdentityDbContext<User>`
+- Seed data into db by overiding the `OnModelCreating` method

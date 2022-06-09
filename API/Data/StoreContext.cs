@@ -1,10 +1,12 @@
 using API.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {
-    // ":" means derived from class DbContext (from EF)
-    public class StoreContext : DbContext
+    // ":" means derived from class IdentityDbContext (from EF)
+    public class StoreContext : IdentityDbContext<User>
     {
         // constructor to pass in options (e.g. DB connection string)
         public StoreContext(DbContextOptions options) : base(options)
@@ -15,5 +17,18 @@ namespace API.Data
         public DbSet<Product> Products { get; set; } // "Products" is table's name
 
         public DbSet<Basket> Baskets { get; set; } // Baskets table
+
+        // alternative way to seed data into db: override OnModelCreating method
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            // from IdentityDbContext class
+            base.OnModelCreating(builder);
+            // add data into db when creating migrations
+            builder.Entity<IdentityRole>()
+                .HasData(
+                    new IdentityRole { Name = "Member", NormalizedName = "MEMBER" },
+                    new IdentityRole { Name = "Admin", NormalizedName = "ADMIN" }
+                );
+        }
     }
 }

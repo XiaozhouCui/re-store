@@ -39,7 +39,11 @@ namespace API
             // Add CORS
             services.AddCors();
             // Add identity configuration
-            services.AddIdentityCore<User>()
+            services.AddIdentityCore<User>(opt =>
+            {
+                // don't allow duplicate email
+                opt.User.RequireUniqueEmail = true;
+            })
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<StoreContext>(); // add all identity tables (AspNetRoles, AspNetUserLogins etc.)
             // add auth

@@ -1,7 +1,9 @@
+using System.Text;
 using API.Data;
 using API.Entities;
 using API.Middleware;
 using API.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -9,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace API
@@ -48,8 +51,22 @@ namespace API
             })
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<StoreContext>(); // add all identity tables (AspNetRoles, AspNetUserLogins etc.)
-            // add auth
-            services.AddAuthentication();
+            // Add Authentication with JWT
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(opt =>
+                {
+                    // validate JWT
+                    opt.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = false, // API
+                        ValidateAudience = false, // Client
+                        ValidateLifetime = true, // check expiry date
+                        ValidateIssuerSigningKey = true, // check JWT signature
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
+                            .GetBytes(Configuration["JWTSettings:TokenKey"]))
+                    };
+                });
+            // Add Authorization
             services.AddAuthorization();
             // add JWT token service, so that it can be injected into account controller
             services.AddScoped<TokenService>();
@@ -81,6 +98,9 @@ namespace API
                     .AllowCredentials() // pass cookies to/from client
                     .WithOrigins("http://localhost:3000");
             });
+
+            // middleware for authentication
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

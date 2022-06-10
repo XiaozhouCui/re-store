@@ -3,6 +3,7 @@ import { FieldValues } from 'react-hook-form';
 import agent from '../../app/api/agent';
 import { User } from '../../app/models/user';
 import { history } from '../..';
+import { toast } from 'react-toastify';
 
 interface AccountState {
   user: User | null;
@@ -31,6 +32,8 @@ export const signInUser = createAsyncThunk<User, FieldValues>(
 export const fetchCurrentUser = createAsyncThunk<User>(
   'account/fetchCurrentUser',
   async (_, thunkAPI) => {
+    // when refreshing the page, if the user is already in local storage, load it into redux
+    thunkAPI.dispatch(setUser(JSON.parse(localStorage.getItem('user')!)));
     try {
       const user = await agent.Account.currentUser();
       // store token into local storage
@@ -39,6 +42,12 @@ export const fetchCurrentUser = createAsyncThunk<User>(
     } catch (error: any) {
       return thunkAPI.rejectWithValue({ error: error.data });
     }
+  },
+  {
+    // if no user in local storage, do not make this request (fetchCurrentUser)
+    condition: () => {
+      if (!localStorage.getItem('user')) return false;
+    },
   }
 );
 
@@ -52,9 +61,20 @@ export const accountSlice = createSlice({
       localStorage.removeItem('user');
       history.push('/'); // browserHistory outside React
     },
+    // add user to state (from local storage)
+    setUser: (state, action) => {
+      state.user = action.payload;
+    },
   },
   // using createAsyncThunk will require extra reducers
   extraReducers: (builder) => {
+    // if token has expired, log out the current user
+    builder.addCase(fetchCurrentUser.rejected, (state, action) => {
+      state.user = null;
+      localStorage.removeItem('user');
+      toast.error('Session expired - please login again');
+      history.push('/');
+    });
     // handle 2 successful cases together: signInUser and fetchCurrentUser
     builder.addMatcher(
       isAnyOf(signInUser.fulfilled, fetchCurrentUser.fulfilled),
@@ -62,13 +82,10 @@ export const accountSlice = createSlice({
         state.user = action.payload;
       }
     );
-    builder.addMatcher(
-      isAnyOf(signInUser.rejected, fetchCurrentUser.rejected),
-      (state, action) => {
-        console.log(action.payload);
-      }
-    );
+    builder.addMatcher(isAnyOf(signInUser.rejected), (state, action) => {
+      console.log(action.payload);
+    });
   },
 });
 
-export const { signOut } = accountSlice.actions;
+export const { signOut, setUser } = accountSlice.actions;

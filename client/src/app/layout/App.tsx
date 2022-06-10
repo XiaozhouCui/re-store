@@ -25,15 +25,18 @@ import { useAppDispatch } from '../store/configureStore';
 import { setBasket } from '../../features/basket/basketSlice';
 import Login from '../../features/account/Login';
 import Register from '../../features/account/Register';
+import { fetchCurrentUser } from '../../features/account/accountSlice';
 // import { useStoreContext } from '../context/StoreContex';
 
 function App() {
   // const { setBasket } = useStoreContext();
   const dispatch = useAppDispatch();
-  
+
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const buyerId = getCookie('buyerId');
+    dispatch(fetchCurrentUser());
     if (buyerId) {
       agent.Basket.get()
         // .then((basket) => setBasket(basket))

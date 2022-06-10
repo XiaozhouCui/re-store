@@ -23,9 +23,9 @@ export const signInUser = createAsyncThunk<User, FieldValues>(
       const userDto = await agent.Account.login(data);
       // user will have email and token, basket is destructured to update redux state
       const { basket, ...user } = userDto;
-      // update basket in state
+      // load basket (from API) into state
       if (basket) thunkAPI.dispatch(setBasket(basket));
-      // store token into local storage
+      // save email and token into local storage
       localStorage.setItem('user', JSON.stringify(user));
       return user;
     } catch (error: any) {
@@ -93,7 +93,8 @@ export const accountSlice = createSlice({
       }
     );
     builder.addMatcher(isAnyOf(signInUser.rejected), (state, action) => {
-      console.log(action.payload);
+      // throw the error so that it can be captured by axios interceptor
+      throw action.payload; // axios interceptor will handle it by status code: toaster or server-error page
     });
   },
 });

@@ -27,9 +27,13 @@ const Login = () => {
   });
 
   const submitForm = async (data: FieldValues) => {
-    await dispatch(signInUser(data));
-    // redirect user to catalog page after login
-    history.push('/catalog');
+    try {
+      await dispatch(signInUser(data));
+      // redirect user to catalog page after login
+      history.push('/catalog');
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (

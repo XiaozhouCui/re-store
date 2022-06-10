@@ -1,6 +1,7 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, isAnyOf } from '@reduxjs/toolkit';
 import agent from '../../app/api/agent';
 import { Basket } from '../../app/models/basket';
+import { getCookie } from '../../app/util/util';
 
 interface BasketState {
   basket: Basket | null;
@@ -12,9 +13,26 @@ const initialState: BasketState = {
   status: 'idle',
 };
 
-// async functions from redux-toolkit, action creators
+// async functions (thunks) from redux-toolkit, as action creators
 
-// add item function will return a Basket obj
+export const fetchBasketAsync = createAsyncThunk<Basket>(
+  'basket/fetchBasketAsync',
+  async (_, thunkAPI) => {
+    try {
+      return await agent.Basket.get();
+    } catch (error: any) {
+      thunkAPI.rejectWithValue({ error: error.data });
+    }
+  },
+  {
+    // only fetch basket if 'buyerId' is in cookie
+    condition: () => {
+      if (!getCookie('buyerId')) return false;
+    },
+  }
+);
+
+// thunk: add item to basket, pass in productId and quantity, return a Basket obj
 export const addBasketItemAsync = createAsyncThunk<
   Basket,
   { productId: number; quantity?: number }
@@ -29,6 +47,7 @@ export const addBasketItemAsync = createAsyncThunk<
   }
 );
 
+// thunk: remove item from basket, pass in productId, quantity and number, return void
 export const removeBasketItemAsync = createAsyncThunk<
   void, // return void
   { productId: number; quantity: number; name?: string }
@@ -55,15 +74,6 @@ export const basketSlice = createSlice({
       // action.payload will be undefined when pending
       state.status = 'pendingAddItem' + action.meta.arg.productId; // append productId, so that not all items have spinners
     });
-    builder.addCase(addBasketItemAsync.fulfilled, (state, action) => {
-      // payload is of type Basket, because addBasketItemAsync will return a Basket
-      state.basket = action.payload;
-      state.status = 'idle';
-    });
-    builder.addCase(addBasketItemAsync.rejected, (state, action) => {
-      state.status = 'idle';
-      console.log(action.payload);
-    });
     builder.addCase(removeBasketItemAsync.pending, (state, action) => {
       // action.meta.arg.name to target the button being clicked for spinner
       state.status =
@@ -88,6 +98,22 @@ export const basketSlice = createSlice({
       state.status = 'idle';
       console.log(action.payload);
     });
+    // addMatcher() must be add after addCase(), they can handle multiple cases
+    builder.addMatcher(
+      isAnyOf(addBasketItemAsync.fulfilled, fetchBasketAsync.fulfilled),
+      (state, action) => {
+        // payload is of type Basket, because addBasketItemAsync will return a Basket
+        state.basket = action.payload;
+        state.status = 'idle';
+      }
+    );
+    builder.addMatcher(
+      isAnyOf(addBasketItemAsync.rejected, fetchBasketAsync.rejected),
+      (state, action) => {
+        state.status = 'idle';
+        console.log(action.payload);
+      }
+    );
   },
 });
 

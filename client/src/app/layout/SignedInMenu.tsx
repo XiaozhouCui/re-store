@@ -1,6 +1,7 @@
 import { Button, Menu, Fade, MenuItem } from '@mui/material';
 import React from 'react';
 import { signOut } from '../../features/account/accountSlice';
+import { clearBasket } from '../../features/basket/basketSlice';
 import { useAppDispatch, useAppSelector } from '../store/configureStore';
 
 const SignedInMenu = () => {
@@ -17,7 +18,9 @@ const SignedInMenu = () => {
 
   return (
     <>
-      <Button onClick={handleClick} color='inherit' sx={{typography: 'h6'}}>{user?.email}</Button>
+      <Button onClick={handleClick} color="inherit" sx={{ typography: 'h6' }}>
+        {user?.email}
+      </Button>
       <Menu
         anchorEl={anchorEl}
         open={open}
@@ -26,7 +29,14 @@ const SignedInMenu = () => {
       >
         <MenuItem onClick={handleClose}>Profile</MenuItem>
         <MenuItem onClick={handleClose}>My orders</MenuItem>
-        <MenuItem onClick={() => dispatch(signOut())}>Logout</MenuItem>
+        <MenuItem
+          onClick={() => {
+            dispatch(signOut());
+            dispatch(clearBasket());
+          }}
+        >
+          Logout
+        </MenuItem>
       </Menu>
     </>
   );

@@ -4,6 +4,7 @@ import agent from '../../app/api/agent';
 import { User } from '../../app/models/user';
 import { history } from '../..';
 import { toast } from 'react-toastify';
+import { setBasket } from '../basket/basketSlice';
 
 interface AccountState {
   user: User | null;
@@ -18,7 +19,12 @@ export const signInUser = createAsyncThunk<User, FieldValues>(
   'account/signInUser',
   async (data, thunkAPI) => {
     try {
-      const user = await agent.Account.login(data);
+      // userDto is the response from API, it has email, token and basket (can be null)
+      const userDto = await agent.Account.login(data);
+      // user will have email and token, basket is destructured to update redux state
+      const { basket, ...user } = userDto;
+      // update basket in state
+      if (basket) thunkAPI.dispatch(setBasket(basket));
       // store token into local storage
       localStorage.setItem('user', JSON.stringify(user));
       return user;
@@ -35,7 +41,11 @@ export const fetchCurrentUser = createAsyncThunk<User>(
     // when refreshing the page, if the user is already in local storage, load it into redux
     thunkAPI.dispatch(setUser(JSON.parse(localStorage.getItem('user')!)));
     try {
-      const user = await agent.Account.currentUser();
+      const userDto = await agent.Account.currentUser();
+      // destructure basket and user
+      const { basket, ...user } = userDto;
+      // update basket in state
+      if (basket) thunkAPI.dispatch(setBasket(basket));
       // store token into local storage
       localStorage.setItem('user', JSON.stringify(user));
       return user;

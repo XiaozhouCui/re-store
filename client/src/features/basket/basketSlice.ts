@@ -67,6 +67,9 @@ export const basketSlice = createSlice({
     setBasket: (state, action) => {
       state.basket = action.payload;
     },
+    clearBasket: (state) => {
+      state.basket = null;
+    },
   },
   // extraReducers are required for createAsyncThunk
   extraReducers: (builder) => {
@@ -118,4 +121,4 @@ export const basketSlice = createSlice({
 });
 
 // exported setBasket only have 1 argument which is the payload of action
-export const { setBasket } = basketSlice.actions;
+export const { setBasket, clearBasket } = basketSlice.actions;

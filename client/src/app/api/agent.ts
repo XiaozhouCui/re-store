@@ -72,6 +72,7 @@ const requests = {
   delete: (url: string) => axios.delete(url).then(responseBody),
 };
 
+// Requests for catalog controller
 const Catalog = {
   // get('products', params) is GET http://localhost:5000/api/products?pageNumber=1&pageSize=6&orderBy=name
   list: (params: URLSearchParams) => requests.get('products', params),
@@ -88,6 +89,7 @@ const TestErrors = {
   getValidationError: () => requests.get('buggy/validation-error'),
 };
 
+// Requests for basket controller
 const Basket = {
   // cookies "buyerId" included in req and res
   get: () => requests.get('basket'),
@@ -97,10 +99,18 @@ const Basket = {
     requests.delete(`basket?productId=${productId}&quantity=${quantity}`),
 };
 
+// Requests for account controller
+const Account = {
+  login: (values: any) => requests.post('account/login', values),
+  register: (values: any) => requests.post('account/register', values),
+  currentUser: () => requests.get('account/currentUser'),
+};
+
 const agent = {
   Catalog,
   TestErrors,
   Basket,
+  Account,
 };
 
 export default agent;

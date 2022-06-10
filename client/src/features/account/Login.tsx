@@ -8,7 +8,7 @@ import {
   Typography,
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { FieldValues, useForm } from 'react-hook-form';
 import { LoadingButton } from '@mui/lab';
 import { useAppDispatch } from '../../app/store/configureStore';
@@ -17,6 +17,8 @@ import { signInUser } from './accountSlice';
 const Login = () => {
   // use history obj to push user to new page after login
   const history = useHistory();
+  // use location to help redirect to previous page before login
+  const location = useLocation<any>();
   const dispatch = useAppDispatch();
   const {
     register,
@@ -29,8 +31,8 @@ const Login = () => {
   const submitForm = async (data: FieldValues) => {
     try {
       await dispatch(signInUser(data));
-      // redirect user to catalog page after login
-      history.push('/catalog');
+      // redirect user to previous page or catalog page after login
+      history.push(location.state?.from?.pathname || '/catalog');
     } catch (error) {
       console.log(error);
     }

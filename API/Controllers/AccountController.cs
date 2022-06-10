@@ -1,10 +1,13 @@
 using System.Threading.Tasks;
+using API.Data;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -13,8 +16,10 @@ namespace API.Controllers
         // use _userManager to interact with db
         private readonly UserManager<User> _userManager;
         private readonly TokenService _tokenService;
-        public AccountController(UserManager<User> userManager, TokenService tokenService)
+        private readonly StoreContext _context;
+        public AccountController(UserManager<User> userManager, TokenService tokenService, StoreContext context)
         {
+            _context = context;
             _tokenService = tokenService;
             _userManager = userManager;
         }
@@ -30,10 +35,30 @@ namespace API.Controllers
             {
                 return Unauthorized();
             }
+
+            // on login, try to get user's basket from DB, can be null
+            var userBasket = await RetrieveBasket(loginDto.Username);
+            // also on login, try to get the anonymous basket using client's cookie
+            var anonBasket = await RetrieveBasket(Request.Cookies["buyerId"]);
+
+            // if there is an anonymous basket before login, replace the user's basket with the anonymous one, because it's newer
+            if (anonBasket != null)
+            {
+                // delete the user's basket if exist
+                if (userBasket != null) _context.Baskets.Remove(userBasket);
+                // transfer the anonymous basket to the user
+                anonBasket.BuyerId = user.UserName;
+                // remove cookie from client browser
+                Response.Cookies.Delete("buyerId");
+                // persist to db
+                await _context.SaveChangesAsync();
+            }
+
             return new UserDto
             {
                 Email = user.Email,
-                Token = await _tokenService.GenerateToken(user)
+                Token = await _tokenService.GenerateToken(user),
+                Basket = anonBasket != null ? anonBasket.MapBasketToDto() : userBasket.MapBasketToDto()
             };
         }
 
@@ -71,6 +96,21 @@ namespace API.Controllers
                 Email = user.Email,
                 Token = await _tokenService.GenerateToken(user)
             };
+        }
+        private async Task<Basket> RetrieveBasket(string buyerId)
+        {
+            if (string.IsNullOrEmpty(buyerId))
+            {
+                // delete cookie from response if no buyerId passed in
+                Response.Cookies.Delete("buyerId");
+                // no buyerId then no basket returned
+                return null;
+            }
+            // use cookie "buyerId" to search Baskets table, then get the basket, its items and product info
+            return await _context.Baskets
+                .Include(i => i.Items) // basket 1-to-many basketItem
+                .ThenInclude(p => p.Product) // basketItem 1-to-1 product
+                .FirstOrDefaultAsync(x => x.BuyerId == buyerId); // return null if no basket found
         }
     }
 }

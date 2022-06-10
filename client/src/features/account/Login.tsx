@@ -1,16 +1,33 @@
-import * as React from 'react';
-import { Avatar, Button, TextField, Grid, Box, Typography, Container, Paper } from '@mui/material';
+import { FormEvent, useState } from 'react';
+import {
+  Avatar,
+  Box,
+  Button,
+  Container,
+  Grid,
+  Paper,
+  TextField,
+  Typography,
+} from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { Link } from 'react-router-dom';
+import agent from '../../app/api/agent';
 
 const Login = () => {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const [values, setValues] = useState({
+    username: '',
+    password: '',
+  });
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    agent.Account.login(values);
+  };
+
+  const handleInputChange = (event: any) => {
+    // name can be username or password
+    const { name, value } = event.target;
+    setValues({ ...values, [name]: value });
   };
 
   return (
@@ -33,23 +50,21 @@ const Login = () => {
       <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
         <TextField
           margin="normal"
-          required
           fullWidth
-          id="email"
-          label="Email Address"
-          name="email"
-          autoComplete="email"
+          label="Username"
+          name="username"
           autoFocus
+          onChange={handleInputChange}
+          value={values.username}
         />
         <TextField
           margin="normal"
-          required
           fullWidth
           name="password"
           label="Password"
           type="password"
-          id="password"
-          autoComplete="current-password"
+          onChange={handleInputChange}
+          value={values.password}
         />
         <Button
           type="submit"

@@ -49,6 +49,7 @@ export const basketSlice = createSlice({
       state.basket = action.payload;
     },
   },
+  // extraReducers are required for createAsyncThunk
   extraReducers: (builder) => {
     builder.addCase(addBasketItemAsync.pending, (state, action) => {
       // action.payload will be undefined when pending

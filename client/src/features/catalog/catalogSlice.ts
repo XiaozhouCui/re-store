@@ -128,6 +128,7 @@ export const catalogSlice = createSlice({
       state.metaData = action.payload;
     },
   },
+  // extraReducers are required for createAsyncThunk
   extraReducers: (builder) => {
     builder.addCase(fetchProductsAsync.pending, (state) => {
       state.status = 'pendingFetchProducts';

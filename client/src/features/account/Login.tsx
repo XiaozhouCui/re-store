@@ -8,26 +8,28 @@ import {
   Typography,
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import { Link } from 'react-router-dom';
-import agent from '../../app/api/agent';
+import { Link, useHistory } from 'react-router-dom';
 import { FieldValues, useForm } from 'react-hook-form';
 import { LoadingButton } from '@mui/lab';
+import { useAppDispatch } from '../../app/store/configureStore';
+import { signInUser } from './accountSlice';
 
 const Login = () => {
+  // use history obj to push user to new page after login
+  const history = useHistory();
+  const dispatch = useAppDispatch();
   const {
     register,
     handleSubmit,
     formState: { isSubmitting, errors, isValid },
   } = useForm({
-    mode: 'onTouched',
+    mode: 'all',
   });
 
   const submitForm = async (data: FieldValues) => {
-    try {
-      await agent.Account.login(data);
-    } catch (error) {
-      console.log(error);
-    }
+    await dispatch(signInUser(data));
+    // redirect user to catalog page after login
+    history.push('/catalog');
   };
 
   return (

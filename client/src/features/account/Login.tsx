@@ -1,8 +1,6 @@
-import { FormEvent, useState } from 'react';
 import {
   Avatar,
   Box,
-  Button,
   Container,
   Grid,
   Paper,
@@ -12,22 +10,18 @@ import {
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { Link } from 'react-router-dom';
 import agent from '../../app/api/agent';
+import { FieldValues, useForm } from 'react-hook-form';
+import { LoadingButton } from '@mui/lab';
 
 const Login = () => {
-  const [values, setValues] = useState({
-    username: '',
-    password: '',
-  });
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm();
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    agent.Account.login(values);
-  };
-
-  const handleInputChange = (event: any) => {
-    // name can be username or password
-    const { name, value } = event.target;
-    setValues({ ...values, [name]: value });
+  const submitForm = async (data: FieldValues) => {
+    await agent.Account.login(data);
   };
 
   return (
@@ -47,33 +41,35 @@ const Login = () => {
       <Typography component="h1" variant="h5">
         Sign in
       </Typography>
-      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit(submitForm)}
+        noValidate
+        sx={{ mt: 1 }}
+      >
         <TextField
           margin="normal"
           fullWidth
           label="Username"
-          name="username"
           autoFocus
-          onChange={handleInputChange}
-          value={values.username}
+          {...register('username')}
         />
         <TextField
           margin="normal"
           fullWidth
-          name="password"
           label="Password"
           type="password"
-          onChange={handleInputChange}
-          value={values.password}
+          {...register('password')}
         />
-        <Button
+        <LoadingButton
+          loading={isSubmitting}
           type="submit"
           fullWidth
           variant="contained"
           sx={{ mt: 3, mb: 2 }}
         >
           Sign In
-        </Button>
+        </LoadingButton>
         <Grid container>
           <Grid item>
             <Link to="/register">{"Don't have an account? Sign Up"}</Link>

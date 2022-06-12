@@ -115,12 +115,13 @@
 ## Identity (login)
 
 ### Install nuget packages
+
 - Go to Nuget Gallery, install **Microsoft.AspNetCore.Authentication.JwtBearer**
 - Also in Nuget, install **Microsoft.AspNetCore.Identity.EntityFrameworkCore**
 
 ### Setup identity
 
-- Create a new entity class `User`, 
+- Create a custom entity class `User`
 - User class will derive from `IdentityUser`, then User will have all the useful properties (e.g. PasswordHash)
 - Update StoreContext, make sure it is now derived from `IdentityDbContext<User>`
 - Seed data into db by overiding the `OnModelCreating` method
@@ -132,3 +133,19 @@
 - In Program.cs, modify the `Main` method to be async, and pass in userManager
 - Create migration: `dotnet ef migrations add IdentityAdded`
 - Re-run the app: `dotnet watch run`, this will create the tables in DB
+
+## Setup Order table
+
+### Add new entities for Order table
+
+- Add new entities in folder _API/Entities/OrderAggregate_
+
+### Refactor identity and re-build database
+
+- By default, the Id of Identity tables are string (GUID), need to convert them into integer
+- Update Id types in User.cs, Role.cs, StoreContext.cs and Startup.cs
+- Drop the current database, run `dotnet ef database drop`, this will delete _store.db_
+- Remove all the migrations: delete folder _API/Data/Migrations_
+- Create a new migration: `dotnet ef migrations add OrderEntityAdded -o Data/Migrations`
+- The new migration file uses `<int>` for Id columns (autoincrement) in Identity tables (e.g. AspNetRoles)
+- Run the migration: `dotnet watch run`, this will re-build the database with updated table structures, and re-seed the data

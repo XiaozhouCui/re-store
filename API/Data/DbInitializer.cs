@@ -19,7 +19,7 @@ namespace API.Data
                     UserName = "bob",
                     Email = "bob@test.com"
                 };
-                await userManager.CreateAsync(user, "Pa$$0rd");
+                await userManager.CreateAsync(user, "Pa$$w0rd");
                 // roles are created in StoreContext.cs
                 await userManager.AddToRoleAsync(user, "Member");
 
@@ -28,7 +28,7 @@ namespace API.Data
                     UserName = "admin",
                     Email = "admin@test.com"
                 };
-                await userManager.CreateAsync(admin, "Pa$$0rd");
+                await userManager.CreateAsync(admin, "Pa$$w0rd");
                 await userManager.AddToRolesAsync(admin, new[] { "Member", "Admin" });
             }
             // check if there are already product data in database

@@ -1,13 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 
 namespace API.Entities
 {
-    public class User : IdentityUser
+    // <int> to override the type of Id of IdentityUser (default type was string)
+    public class User : IdentityUser<int>
     {
-        // no need to define properties, all inherited from IdentityUser
+        // other properties are inherited from IdentityUser
+        public UserAddress Address { get; set; }
     }
 }

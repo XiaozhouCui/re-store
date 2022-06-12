@@ -77,7 +77,7 @@ namespace API
                 // don't allow duplicate email
                 opt.User.RequireUniqueEmail = true;
             })
-                .AddRoles<IdentityRole>()
+                .AddRoles<Role>() // Role is a custom entity derived from IdentityRole with Id type of integer
                 .AddEntityFrameworkStores<StoreContext>(); // add all identity tables (AspNetRoles, AspNetUserLogins etc.)
             // Add Authentication with JWT
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

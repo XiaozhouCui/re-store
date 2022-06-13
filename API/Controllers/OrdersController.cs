@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,20 +23,20 @@ namespace API.Controllers
 
         // get a list of orders for a logged in user
         [HttpGet]
-        public async Task<ActionResult<List<Order>>> GetOrders()
+        public async Task<ActionResult<List<OrderDto>>> GetOrders()
         {
             return await _context.Orders
-                .Include(o => o.OrderItems) // include items into order
+                .ProjectOrderToOrderDto() // custom extension method of Order
                 .Where(x => x.BuyerId == User.Identity.Name) // logged in user's name is buyerId
                 .ToListAsync();
         }
 
         // get single order by Id, "GetOrder" is the name of route
         [HttpGet("{id}", Name = "GetOrder")]
-        public async Task<ActionResult<Order>> GetOrder(int id)
+        public async Task<ActionResult<OrderDto>> GetOrder(int id)
         {
             return await _context.Orders
-                .Include(o => o.OrderItems)
+                .ProjectOrderToOrderDto()
                 .Where(x => x.BuyerId == User.Identity.Name && x.Id == id) // check both buyerId and orderId
                 .FirstOrDefaultAsync(); // can be null
         }

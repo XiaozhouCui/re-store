@@ -7,7 +7,7 @@ import {
   Stepper,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FieldValues, FormProvider, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import AddressForm from './AddressForm';
@@ -49,6 +49,20 @@ const CheckoutPage = () => {
     mode: 'all',
     resolver: yupResolver(currentValidationSchema),
   });
+
+  useEffect(() => {
+    // get previously saved address from DB
+    agent.Account.fetchAddress().then((response) => {
+      // reset the form with the values from API
+      if (response) {
+        methods.reset({
+          ...methods.getValues(),
+          ...response,
+          saveAddress: false,
+        });
+      }
+    });
+  }, [methods]);
 
   const handleNext = async (data: FieldValues) => {
     // destructure nameOnCard and saveAddress, everything else is shipping address
@@ -102,9 +116,9 @@ const CheckoutPage = () => {
                 Thank you for your order.
               </Typography>
               <Typography variant="subtitle1">
-                Your order number is #{orderNumber}. We have not emailed your order
-                confirmation, and will not send you an update when your order has
-                shipped as this is a fake store!
+                Your order number is #{orderNumber}. We have not emailed your
+                order confirmation, and will not send you an update when your
+                order has shipped as this is a fake store!
               </Typography>
             </>
           ) : (

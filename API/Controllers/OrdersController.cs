@@ -101,13 +101,16 @@ namespace API.Controllers
             // remove basket from db context
             _context.Baskets.Remove(basket);
 
-            // check if user selected "save address"
+            // check if user ticked checkbox "save address"
             if (orderDto.SaveAddress)
             {
                 // get user without UserManager
-                var user = await _context.Users.FirstOrDefaultAsync(x => x.UserName == User.Identity.Name);
+                var user = await _context.Users
+                    .Include(a => a.Address) // eager loading
+                    .FirstOrDefaultAsync(x => x.UserName == User.Identity.Name);
+
                 // map to UserAddress
-                user.Address = new UserAddress
+                var address = new UserAddress
                 {
                     FullName = orderDto.ShippingAddress.FullName,
                     Address1 = orderDto.ShippingAddress.Address1,
@@ -118,7 +121,7 @@ namespace API.Controllers
                     Country = orderDto.ShippingAddress.Country
                 };
                 // update user's address using order's address
-                _context.Update(user);
+                user.Address = address;
             }
 
             // persist to db

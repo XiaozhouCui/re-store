@@ -5,7 +5,7 @@ import AppTextInput from '../../app/components/AppTextInput';
 
 export default function AddressForm() {
   // use react-hook-form to make it a controlled form
-  const { control } = useFormContext();
+  const { control, formState } = useFormContext();
 
   return (
     <>
@@ -36,6 +36,7 @@ export default function AddressForm() {
         </Grid>
         <Grid item xs={12}>
           <AppCheckbox
+            disabled={!formState.isDirty}
             name="saveAddress"
             label="Save this as the default address"
             control={control}

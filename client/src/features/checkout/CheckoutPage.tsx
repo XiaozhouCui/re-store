@@ -31,16 +31,19 @@ function getStepContent(step: number) {
 }
 
 const CheckoutPage = () => {
+  const [activeStep, setActiveStep] = useState(0);
+
+  // is an array with each element for each checkout-step
+  const currentValidationSchema = validationSchema[activeStep];
+
   // pass the methods to child components through <FormProvider>
   const methods = useForm({
     mode: 'all',
-    resolver: yupResolver(validationSchema),
+    resolver: yupResolver(currentValidationSchema),
   });
 
-  const [activeStep, setActiveStep] = useState(0);
-
   const handleNext = (data: FieldValues) => {
-    if (activeStep === 0) {
+    if (activeStep === 2) {
       console.log(data);
     }
     setActiveStep(activeStep + 1);

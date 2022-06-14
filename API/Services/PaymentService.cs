@@ -7,8 +7,10 @@ using Stripe;
 
 namespace API.Services
 {
-    // PaymentService does not access database, so it's not a controller. Will be injected into payment controller
-    // PaymentService only interacts with 3rd party service: Stripe
+    // 
+    // Summary:
+    //     PaymentService does not access database, so it's not a controller. It will 
+    //     be injected into PaymentController to interact with Stripe
     public class PaymentService
     {
         // get config values (Stripe keys) using DI
@@ -42,9 +44,6 @@ namespace API.Services
                     PaymentMethodTypes = new List<string> { "card" }
                 };
                 intent = await service.CreateAsync(options);
-                // new intent will have PaymentIntentId and ClientSecret, assign them to the basket
-                basket.PaymentIntentId = intent.Id;
-                basket.ClientSecret = intent.ClientSecret;
             }
             else
             {

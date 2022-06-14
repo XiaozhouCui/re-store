@@ -5,6 +5,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { CardNumberElement } from '@stripe/react-stripe-js';
 import { useFormContext } from 'react-hook-form';
 import AppTextInput from '../../app/components/AppTextInput';
 
@@ -25,12 +26,15 @@ export default function PaymentForm() {
         </Grid>
         <Grid item xs={12} md={6}>
           <TextField
-            // required
             id="cardNumber"
             label="Card number"
             fullWidth
             autoComplete="cc-number"
             variant="standard"
+            InputLabelProps={{ shrink: true }}
+            InputProps={{
+              // inputComponent: CardNumberElement,
+            }}
           />
         </Grid>
         <Grid item xs={12} md={6}>

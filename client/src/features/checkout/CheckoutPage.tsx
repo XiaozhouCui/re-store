@@ -18,21 +18,9 @@ import agent from '../../app/api/agent';
 import { useAppDispatch } from '../../app/store/configureStore';
 import { clearBasket } from '../basket/basketSlice';
 import { LoadingButton } from '@mui/lab';
+import { StripeElementType } from '@stripe/stripe-js';
 
 const steps = ['Shipping address', 'Review your order', 'Payment details'];
-
-function getStepContent(step: number) {
-  switch (step) {
-    case 0:
-      return <AddressForm />;
-    case 1:
-      return <Review />;
-    case 2:
-      return <PaymentForm />;
-    default:
-      throw new Error('Unknown step');
-  }
-}
 
 const CheckoutPage = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -40,6 +28,52 @@ const CheckoutPage = () => {
   const [loading, setLoading] = useState(false);
 
   const dispatch = useAppDispatch();
+
+  // add local state to track Stripe card input for validation
+  const [cardState, setCardState] = useState<{
+    elementError: { [key in StripeElementType]?: string };
+  }>({ elementError: {} });
+
+  const [cardComplete, setCardComplete] = useState<any>({
+    cardNumber: false,
+    cardExpiry: false,
+    cardCvc: false,
+  });
+
+  // track if inputs are complete
+  const onCardInputChange = (event: any) => {
+    setCardState({
+      ...cardState,
+      // append element error if exists
+      elementError: {
+        ...cardState.elementError,
+        // elementType: cardNumber, cardExpiry, cardCvc etc.
+        [event.elementType]: event.error?.message,
+      },
+    });
+    setCardComplete({
+      ...cardComplete,
+      [event.elementType]: event.complete,
+    });
+  };
+
+  const getStepContent = (step: number) => {
+    switch (step) {
+      case 0:
+        return <AddressForm />;
+      case 1:
+        return <Review />;
+      case 2:
+        return (
+          <PaymentForm
+            cardState={cardState}
+            onCardInputChange={onCardInputChange}
+          />
+        );
+      default:
+        throw new Error('Unknown step');
+    }
+  };
 
   // is an array with each element for each checkout-step
   const currentValidationSchema = validationSchema[activeStep];
@@ -93,6 +127,20 @@ const CheckoutPage = () => {
     setActiveStep(activeStep - 1);
   };
 
+  const submitDisabled = (): boolean => {
+    // check if on PaymentForm
+    if (activeStep === steps.length - 1) {
+      return (
+        !cardComplete.cardCvc ||
+        !cardComplete.cardExpiry ||
+        !cardComplete.cardNumber ||
+        !methods.formState.isValid
+      );
+    }
+    // if not on PaymentForm
+    return !methods.formState.isValid;
+  };
+
   return (
     <FormProvider {...methods}>
       <Paper
@@ -132,7 +180,7 @@ const CheckoutPage = () => {
                 )}
                 <LoadingButton
                   loading={loading}
-                  disabled={!methods.formState.isValid}
+                  disabled={submitDisabled()}
                   variant="contained"
                   type="submit"
                   sx={{ mt: 3, ml: 1 }}

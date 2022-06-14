@@ -5,40 +5,16 @@ import {
   CardNumberElement,
 } from '@stripe/react-stripe-js';
 import { StripeElementType } from '@stripe/stripe-js';
-import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import AppTextInput from '../../app/components/AppTextInput';
 import { StripeInput } from './StripeInput';
 
-export default function PaymentForm() {
-  // add local state to track Stripe card input for validation
-  const [cardState, setCardState] = useState<{
-    elementError: { [key in StripeElementType]?: string };
-  }>({ elementError: {} });
+interface Props {
+  cardState: { elementError: { [key in StripeElementType]?: string } };
+  onCardInputChange: (event: any) => void;
+}
 
-  const [cardComplete, setCardComplete] = useState<any>({
-    cardNumber: false,
-    cardExpiry: false,
-    cardCvc: false,
-  });
-
-  // track if inputs are complete
-  const onCardInputChange = (event: any) => {
-    setCardState({
-      ...cardState,
-      // append element error if exists
-      elementError: {
-        ...cardState.elementError,
-        // elementType: cardNumber, cardExpiry, cardCvc etc.
-        [event.elementType]: event.error?.message,
-      },
-    });
-    setCardComplete({
-      ...cardComplete,
-      [event.elementType]: event.complete,
-    });
-  };
-
+export default function PaymentForm({ cardState, onCardInputChange }: Props) {
   const { control } = useFormContext();
   return (
     <>

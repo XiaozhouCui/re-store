@@ -98,6 +98,8 @@ namespace API
             services.AddAuthorization();
             // add JWT token service, so that it can be injected into account controller
             services.AddScoped<TokenService>();
+            // PaymentService will be injected into PaymentController
+            services.AddScoped<PaymentService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline. (Middleware)

@@ -8,6 +8,7 @@ const stripePromise = loadStripe(
 );
 
 // wrap the Stripe provider around the CheckoutPage
+// https://stripe.com/docs/stripe-js/react#elements-provider
 const CheckoutWrapper = () => {
   return (
     <Elements stripe={stripePromise}>

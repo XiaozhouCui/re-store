@@ -11,6 +11,12 @@ namespace API.Entities
         // always initialise a new list when a basket is created, can be an empty List (1-to-many-or-0)
         public List<BasketItem> Items { get; set; } = new List<BasketItem>();
 
+        // Client need to create a PaymentIntent before making payment
+        public string PaymentIntentId { get; set; }
+
+        // ClientSecret will be passed back to the client, so that client can use it to make payment to Stripe
+        public string ClientSecret { get; set; }
+
         // method for adding item
         public void AddItem(Product product, int quantity)
         {

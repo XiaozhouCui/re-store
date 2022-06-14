@@ -149,3 +149,28 @@
 - Create a new migration: `dotnet ef migrations add OrderEntityAdded -o Data/Migrations`
 - The new migration file uses `<int>` for Id columns (autoincrement) in Identity tables (e.g. AspNetRoles)
 - Run the migration: `dotnet watch run`, this will re-build the database with updated table structures, and re-seed the data
+
+## Stripe integration
+
+- Webhook is used to integrate Stripe with our API
+- `PaymentIntent` and `ClientSecret` are required to make payment compatible in most countries
+
+### Setup Stripe account
+
+- Signup and login to Stripe
+- Create a new account: **re-store**
+- In dashboard, click the **Developers** tab, then select **API keys**
+- Copy the publishable key and secret key and paste them into _appsettings.json_
+
+### Install Nuget package for Stripe
+
+- Open Nuget Gallery, search for "stripe"
+- Find `Stripe.net`, and install it into API.csproj
+
+### Setup backend API
+
+- In `Basket.cs`, add new properties (columns) `PaymentIntentId` and `ClientSecret`
+- In `Order.cs`, add new property (column) `PaymentIntentId`
+- Since entities classes are changed, need to run migration
+- Create new migration: `dotnet ef migrations add PaymentIntentAdded`
+- Run migration: `dotnet watch run`, new columns will be added

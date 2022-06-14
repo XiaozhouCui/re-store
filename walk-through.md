@@ -152,8 +152,9 @@
 
 ## Stripe integration
 
-- Webhook is used to integrate Stripe with our API
-- `PaymentIntent` and `ClientSecret` are required to make payment compatible in most countries
+- Webhook is used to integrate Stripe with our API, to make payment compatible in most countries
+- When client click "CHECKOUT" button, API will create `PaymentIntent` and `ClientSecret` and return to client
+- Frontend will use `PaymentIntent` and `ClientSecret` to interact directly with Stripe
 
 ### Setup Stripe account
 

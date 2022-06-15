@@ -15,10 +15,15 @@ import PaymentForm from './PaymentForm';
 import Review from './Review';
 import { validationSchema } from './checkoutValidation';
 import agent from '../../app/api/agent';
-import { useAppDispatch } from '../../app/store/configureStore';
+import { useAppDispatch, useAppSelector } from '../../app/store/configureStore';
 import { clearBasket } from '../basket/basketSlice';
 import { LoadingButton } from '@mui/lab';
 import { StripeElementType } from '@stripe/stripe-js';
+import {
+  CardNumberElement,
+  useElements,
+  useStripe,
+} from '@stripe/react-stripe-js';
 
 const steps = ['Shipping address', 'Review your order', 'Payment details'];
 
@@ -40,7 +45,19 @@ const CheckoutPage = () => {
     cardCvc: false,
   });
 
-  // track if inputs are complete
+  // indicate payment status from Stripe
+  const [paymentMessage, setPaymentMessage] = useState('');
+  const [paymentSucceeded, setPaymentSucceeded] = useState(false);
+
+  // basket in redux contains ClientSecret from Stripe
+  const { basket } = useAppSelector((state) => state.basket);
+
+  // create actual payment
+  const stripe = useStripe();
+  // card elements, e.g. CardNumberElement
+  const elements = useElements();
+
+  // track if card inputs are complete
   const onCardInputChange = (event: any) => {
     setCardState({
       ...cardState,
@@ -98,26 +115,58 @@ const CheckoutPage = () => {
     });
   }, [methods]);
 
-  const handleNext = async (data: FieldValues) => {
+  // once the PaymentIntent is set, submit order to Stripe
+  const submitOrder = async (data: FieldValues) => {
+    // all frontend validations have passed at this stage
+    setLoading(true);
     // destructure nameOnCard and saveAddress, everything else is shipping address
     const { nameOnCard, saveAddress, ...shippingAddress } = data;
-    if (activeStep === steps.length - 1) {
-      setLoading(true);
-      try {
-        // create order will have order number back from API
+    if (!stripe || !elements) return; // stripe is not ready
+    try {
+      // only provide card number element, then Stripe will get the remaining elements
+      const cardElement = elements.getElement(CardNumberElement);
+      // call Stripe API
+      const paymentResult = await stripe.confirmCardPayment(
+        basket?.clientSecret!,
+        {
+          payment_method: {
+            card: cardElement!,
+            billing_details: {
+              name: nameOnCard,
+            },
+          },
+        }
+      );
+      console.log(paymentResult);
+      // if payment is successful, create the order
+      if (paymentResult.paymentIntent?.status === 'succeeded') {
+        // creating order will have order number back from API
         const orderNumber = await agent.Orders.create({
           saveAddress,
           shippingAddress,
         });
         setOrderNumber(orderNumber);
-        setActiveStep(activeStep + 1);
-        // clear basket from redux state
-        dispatch(clearBasket());
+        setPaymentSucceeded(true);
+        setPaymentMessage('Thank you - we have received your payment');
+        setActiveStep(activeStep + 1); // last step is to display paymentMessage
+        dispatch(clearBasket()); // clear basket from redux state
         setLoading(false);
-      } catch (error: any) {
-        console.log(error);
+      } else {
+        setPaymentMessage(paymentResult.error?.message!);
+        setPaymentSucceeded(false);
         setLoading(false);
+        setActiveStep(activeStep + 1); // last step is to display paymentMessage
       }
+    } catch (error: any) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
+
+  const handleNext = async (data: FieldValues) => {
+    // second last step is to make payment
+    if (activeStep === steps.length - 1) {
+      await submitOrder(data);
     } else {
       setActiveStep(activeStep + 1);
     }
@@ -128,8 +177,9 @@ const CheckoutPage = () => {
   };
 
   const submitDisabled = (): boolean => {
-    // check if on PaymentForm
+    // check if on PaymentForm (second last step)
     if (activeStep === steps.length - 1) {
+      // disable the submit button if any stripe or custom validation fails
       return (
         !cardComplete.cardCvc ||
         !cardComplete.cardExpiry ||
@@ -137,7 +187,7 @@ const CheckoutPage = () => {
         !methods.formState.isValid
       );
     }
-    // if not on PaymentForm
+    // if not on PaymentForm, noly check custom validation
     return !methods.formState.isValid;
   };
 
@@ -161,13 +211,19 @@ const CheckoutPage = () => {
           {activeStep === steps.length ? (
             <>
               <Typography variant="h5" gutterBottom>
-                Thank you for your order.
+                {paymentMessage}
               </Typography>
-              <Typography variant="subtitle1">
-                Your order number is #{orderNumber}. We have not emailed your
-                order confirmation, and will not send you an update when your
-                order has shipped as this is a fake store!
-              </Typography>
+              {paymentSucceeded ? (
+                <Typography variant="subtitle1">
+                  Your order number is #{orderNumber}. We have not emailed your
+                  order confirmation, and will not send you an update when your
+                  order has shipped as this is a fake store!
+                </Typography>
+              ) : (
+                <Button variant="contained" onClick={handleBack}>
+                  Go back and try again
+                </Button>
+              )}
             </>
           ) : (
             <form onSubmit={methods.handleSubmit(handleNext)}>

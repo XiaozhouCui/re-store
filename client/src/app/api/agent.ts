@@ -7,7 +7,7 @@ import { store } from '../store/configureStore';
 const sleep = () => new Promise((resolve) => setTimeout(resolve, 500));
 
 // all requests url will be pre-fixed with this base url
-axios.defaults.baseURL = 'http://localhost:5000/api/';
+axios.defaults.baseURL = process.env.REACT_APP_URL;
 // allow receive/set cookies in browser
 axios.defaults.withCredentials = true;
 
@@ -24,7 +24,7 @@ axios.interceptors.request.use((config) => {
 // interceptor
 axios.interceptors.response.use(
   async (response) => {
-    await sleep();
+    if (process.env.NODE_ENV === 'development') await sleep();
     const pagination = response.headers['pagination']; // 'pagination' must be lower case
     // if has pagination header, merge it with response body
     if (pagination) {

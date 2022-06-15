@@ -221,3 +221,14 @@
 - To check the secrets, run `dotnet user-secrets list`
 - Once secrets are setup, remove `StripeSettings` object from _appsettings.json_
 - Restart the API and stripe listener, and the app should be working fine
+
+## Deployment
+
+### Prepare React production build
+
+- Add _.env.development_ and _.env.production_ to store API endpoint for feach env
+- Frontend files will be served in the _wwwroot_ folder of API
+- Update npm script for `build`, inject `BUILD_PATH='../API/wwwroot'`
+- In Mac/Linux run `npm run build`, in Windows run `npm run build_win`
+
+### Serve client app from API

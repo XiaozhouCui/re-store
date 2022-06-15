@@ -180,26 +180,44 @@
 
 - Make sure the Stripe dashboard is set to TEST mode
 - Test various card [numbers](https://stripe.com/docs/testing#cards) for different payment results:
-- Successful: *4242 4242 4242 4242*
-- Insufficient funds decline: *4000 0000 0000 9995*
-- Stolen card decline: *4000 0000 0000 9979*
-- Popup authentication: *4000 0027 6000 3184*. Stripe will show a modal for further authentication
+- Successful: _4242 4242 4242 4242_
+- Insufficient funds decline: _4000 0000 0000 9995_
+- Stolen card decline: _4000 0000 0000 9979_
+- Popup authentication: _4000 0027 6000 3184_. Stripe will show a modal for further authentication
 
 ## Stripe CLI and webhook
 
-### Setup Stripe CLI
+### Setup Stripe CLI for localhost
 
 - Download Stripe CLI file for Windows: https://stripe.com/docs/stripe-cli
 - Extract the zip file, and go to the folder containing **stripe.exe**
-- Run `stripe login`, then it will open a browser, click **allow access** to `re-store` project in Stripe
+- In that folder, run `stripe login`, then it will open a browser, click **allow access** to `re-store` project in Stripe
 - Login will expire after 90 days
 
 ### Get webhook signing secret
+
 - Run `stripe listen`, it will give a webhook signing secret
 - Copy the key and paste it to _appsettings.json_ as `WhSecret` under `StripeSettings`
 
 ### Integrate webhook in API
-- In PaymentController, add a new route `[HttpPost("webhook")]`
+
+- In PaymentController, add a new route handler `[HttpPost("webhook")]`
 - Once added, run `stripe listen -f http://localhost:5000/api/payment/webhook -e charge.succeeded`
 - Above command will forward the request to localhost, pass in event: `charge.succeeded`
 - While the `stripe listen` is running, make another payment in frontend, the Order Status should show `PaymentReceived`
+
+## Handle user secrets
+
+### Create user secrets for local machine
+
+- user-secrets is for local machine, and need reset when running localhost (Development env) in another machine
+- Run `dotnet user-secrets init` in API folder, this will add `UserSecretsId` in _API.csproj_
+- Set the Stripe PublishableKey: `dotnet user-secrets set "StripeSettings:PublishableKey" <your_pub_key>`
+- Set the Stripe SecretKey: `dotnet user-secrets set "StripeSettings:SecretKey" <your_sec_key>`
+- Set the Stripe webhook signing secret: `dotnet user-secrets set "StripeSettings:WhSecret" <your_wh_secret>`
+
+### Test user secrets in localhost
+
+- To check the secrets, run `dotnet user-secrets list`
+- Once secrets are setup, remove `StripeSettings` object from _appsettings.json_
+- Restart the API and stripe listener, and the app should be working fine

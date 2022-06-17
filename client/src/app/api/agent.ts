@@ -7,7 +7,7 @@ import { store } from '../store/configureStore';
 const sleep = () => new Promise((resolve) => setTimeout(resolve, 500));
 
 // all requests url will be pre-fixed with this base url
-axios.defaults.baseURL = process.env.REACT_APP_URL;
+axios.defaults.baseURL = process.env.REACT_APP_API_URL;
 // allow receive/set cookies in browser
 axios.defaults.withCredentials = true;
 

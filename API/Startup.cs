@@ -119,6 +119,11 @@ namespace API
             // app.UseHttpsRedirection(); // not using HTTPS in dev mode
 
             app.UseRouting();
+
+            // for serving static frontend files in wwwroot
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+
             // CORS middleware must come after UseRouting()
             app.UseCors(opt =>
             {
@@ -137,6 +142,8 @@ namespace API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                // for routing issue's fallback
+                endpoints.MapFallbackToController("Index", "Fallback");
             });
         }
     }

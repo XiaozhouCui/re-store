@@ -67,7 +67,10 @@ namespace API
             services.AddDbContext<StoreContext>(opt =>
             {
                 // pass in option for SQLite connection string
-                opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
+                // opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
+
+                // Use postgres container in localhost
+                opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
             });
             // Add CORS
             services.AddCors();

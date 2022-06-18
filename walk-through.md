@@ -224,11 +224,22 @@
 
 ## Deployment
 
-### Prepare React production build
+### Serve the React production build from API
 
-- Add _.env.development_ and _.env.production_ to store API endpoint for feach env
-- Frontend files will be served in the _wwwroot_ folder of API
-- Update npm script for `build`, inject `BUILD_PATH='../API/wwwroot'`
-- In Mac/Linux run `npm run build`, in Windows run `npm run build_win`
+- In frontend, add _.env.development_ and _.env.production_ to store API endpoint for feach env
+- Update agent.ts to use environment variables for different API end points for dev and prod
+- Create a new folder _wwwroot_ in API
+- In client folder, run `npm run build`, static files will be created under _build_ folder
+- Copy the static files from _/client/build_ to _/API/wwwroot_
+- In API, update the _startup.cs_ to serve static files
 
-### Serve client app from API
+### Switch to Postgres from SQLite
+
+- Start docker container: `docker run --name restore_dev -e POSTGRES_USER=appuser -e POSTGRES_PASSWORD=secret -p 54321:5432 -d postgres:latest`
+- Note that on Windows the exposed port should is `54321`, because `5432` is already used by PostgreSQL for Windows.
+- In _appsettings.Development.json_, update ConnectionStrings
+- In Nuget Gallery, install `Npgsql.EntityFrameworkCore.PostgreSQL` into API.csproj
+- In Startup.cs, update the `services.AddDbContext()` by adding `opt.UseNpgsql()`
+- Remove the _Migrations_ folder completely, as they were for SQLite
+- Create a clean migration: `dotnet ef migrations add PostgresInitial -o Data/Migrations`
+- Run the migration `dotnet watch run`, everything should work as before

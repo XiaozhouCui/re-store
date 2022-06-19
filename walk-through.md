@@ -243,3 +243,16 @@
 - Remove the _Migrations_ folder completely, as they were for SQLite
 - Create a clean migration: `dotnet ef migrations add PostgresInitial -o Data/Migrations`
 - Run the migration `dotnet watch run`, everything should work as before
+
+### Setup Heroku
+
+- Login to heroku, create a new app: **re-store-88**
+- Install Heroku CLI, then run `heroku login`, then login throuh a popup browser page
+- In project folder (re-store), run `heroku git:remote -a re-store-88`, this will add the git repo to heroku
+- Once created, go to **Resources** tab, search for *Heroku Postgres* and click
+- Select the free plan: *Hobby Dev - Free*, and submit order
+- Then *Heroku Postgres* will ba attached to **re-store-88** app as DATABASE
+- In Settings tab, click Review Config Vars, there will be an new env var: `DATABASE_URL` for connection string
+- Also in Settings tab, under Buildpacks, click *Find nui buildpacks on Heroku Elements*, search for **dotnet**
+- In search results, select `dotnetcore-buildpack` (by jincod), read the docs
+- In CLI, run `heroku buildpacks:set jincod/dotnetcore`. Next release on re-store-88 will use jincod/dotnetcore.

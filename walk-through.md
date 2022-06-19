@@ -224,7 +224,7 @@
 
 ## Deployment
 
-### Serve the React production build from API
+### Serve the React production build from backend
 
 - In frontend, add _.env.development_ and _.env.production_ to store API endpoint for feach env
 - Update agent.ts to use environment variables for different API end points for dev and prod
@@ -249,10 +249,16 @@
 - Login to heroku, create a new app: **re-store-88**
 - Install Heroku CLI, then run `heroku login`, then login throuh a popup browser page
 - In project folder (re-store), run `heroku git:remote -a re-store-88`, this will add the git repo to heroku
-- Once created, go to **Resources** tab, search for *Heroku Postgres* and click
-- Select the free plan: *Hobby Dev - Free*, and submit order
-- Then *Heroku Postgres* will ba attached to **re-store-88** app as DATABASE
-- In Settings tab, click Review Config Vars, there will be an new env var: `DATABASE_URL` for connection string
-- Also in Settings tab, under Buildpacks, click *Find nui buildpacks on Heroku Elements*, search for **dotnet**
+- Once created, go to **Resources** tab, search for _Heroku Postgres_ and click
+- Select the free plan: **Hobby Dev - Free**, and submit order
+- Then _Heroku Postgres_ will ba attached to **re-store-88** app as DATABASE
+- In Settings tab, click _Reveal Config Vars_, there will be an new env var: `DATABASE_URL` for connection string
+- Also in Settings tab, under Buildpacks, click _Find nui buildpacks on Heroku Elements_, search for **dotnet**
 - In search results, select `dotnetcore-buildpack` (by jincod), read the docs
 - In CLI, run `heroku buildpacks:set jincod/dotnetcore`. Next release on re-store-88 will use jincod/dotnetcore.
+
+### Deploy to Heroku
+
+- Add environment variables: run `dotnet user-secrets list`, add the to _Config Vars_ in Heroku
+- When adding JWT secret to Heroku, make sure it is different from that in _appsettings.Development.json_
+- For DB connection string, update the `services.AddDbContext` method in _startup.cs_, to use env var from Heroku

@@ -18,7 +18,7 @@ namespace API.DTOs
         [Range(100, Double.PositiveInfinity)] // price must not be less than $1.00
         public long Price { get; set; }
 
-        public IFormFile PictureUrl { get; set; } // for uploading file from browser (optional)
+        public IFormFile File { get; set; } // for uploading file from browser (optional)
 
         [Required]
         public string Type { get; set; }

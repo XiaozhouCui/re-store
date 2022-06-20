@@ -75,7 +75,7 @@ namespace API.Controllers
         // only admin user can add a new product
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<ActionResult<Product>> CreateProduct([FromForm]CreateProductDto productDto)
+        public async Task<ActionResult<Product>> CreateProduct([FromForm] CreateProductDto productDto)
         {
             // map ProductDto to Product
             var product = _mapper.Map<Product>(productDto);
@@ -104,7 +104,7 @@ namespace API.Controllers
         // only admin user can update a product
         [Authorize(Roles = "Admin")]
         [HttpPut] // no "{id}" required, Id is laready included in UpdateProductDto
-        public async Task<ActionResult> UpdateProduct(UpdateProductDto productDto)
+        public async Task<ActionResult<Product>> UpdateProduct([FromForm]UpdateProductDto productDto)
         {
             // find product by Id from DTO
             var product = await _context.Products.FindAsync(productDto.Id);
@@ -114,10 +114,24 @@ namespace API.Controllers
             // EF will track changes in productDto and save it to product
             _mapper.Map(productDto, product);
 
+            // Add new image to and remove old one from Cloudinary
+            if (productDto.File != null)
+            {
+                var imageResult = await _imageService.AddImageAsync(productDto.File);
+
+                if (imageResult.Error != null) return BadRequest(new ProblemDetails { Title = imageResult.Error.Message });
+
+                // delete the existing image from Cloudinary
+                if (!string.IsNullOrEmpty(product.PublicId)) await _imageService.DeleteImageAsync(product.PublicId);
+
+                product.PictureUrl = imageResult.SecureUrl.ToString(); // image URL with https
+                product.PublicId = imageResult.PublicId; // update the PublicId in Products table
+            }
+
             var result = await _context.SaveChangesAsync() > 0;
 
-            // for HttpPut, typically return NoContent (204)
-            if (result) return NoContent();
+            // return the updated product back to client
+            if (result) return Ok(product);
 
             return BadRequest(new ProblemDetails { Title = "Problem updating product" });
         }
@@ -130,6 +144,9 @@ namespace API.Controllers
             var product = await _context.Products.FindAsync(id);
 
             if (product == null) return NotFound();
+
+            // delete the existing image from Cloudinary
+            if (!string.IsNullOrEmpty(product.PublicId)) await _imageService.DeleteImageAsync(product.PublicId);
 
             _context.Products.Remove(product); // need to save changes to persist to DB
 

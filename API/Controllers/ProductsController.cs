@@ -4,6 +4,7 @@ using API.Data;
 using API.Entities;
 using API.Extensions;
 using API.RequestHelpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,8 +40,9 @@ namespace API.Controllers
 
             return products;
         }
+
         // Get product by ID
-        [HttpGet("{id}")] // api/products/3
+        [HttpGet("{id}", Name = "GetProduct")] // api/products/3
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
             var product = await _context.Products.FindAsync(id);
@@ -49,7 +51,8 @@ namespace API.Controllers
 
             return product;
         }
-        // get filter options for client to select and filter
+
+        // get filter options for client to select and filter products
         [HttpGet("filters")]
         // IActionResult will have all HTTP responses, e.g. NotFound(), OK()
         public async Task<IActionResult> GetFilters()
@@ -60,6 +63,21 @@ namespace API.Controllers
             var types = await _context.Products.Select(p => p.Type).Distinct().ToListAsync();
             // return an anonymous object
             return Ok(new { brands, types });
+        }
+
+        // only admin user can add a new product
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<ActionResult<Product>> CreateProduct(Product product)
+        {
+            _context.Products.Add(product);
+
+            var result = await _context.SaveChangesAsync() > 0;
+
+            // after creating a new resource, return the resource route (api/products/:id) to client
+            if (result) return CreatedAtRoute("GetProduct", new { Id = product.Id }, product);
+            // if failed, return 400
+            return BadRequest(new ProblemDetails { Title = "Problem creating new product" });
         }
     }
 }

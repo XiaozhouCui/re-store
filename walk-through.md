@@ -196,8 +196,9 @@
 
 ### Get webhook signing secret
 
-- Run `stripe listen`, it will give a webhook signing secret
+- Run `stripe listen`, it will give a webhook **Signing Secret** for localhost
 - Copy the key and paste it to _appsettings.json_ as `WhSecret` under `StripeSettings`
+- Once the app is deployed, a new **Signing Secret** will be provided and then be added as environment variable in Heroku
 
 ### Integrate webhook in API
 
@@ -242,7 +243,7 @@
 - In Startup.cs, update the `services.AddDbContext()` by adding `opt.UseNpgsql()`
 - Remove the _Migrations_ folder completely, as they were for SQLite
 - Create a clean migration: `dotnet ef migrations add PostgresInitial -o Data/Migrations`
-- Run the migration `dotnet watch run`, everything should work as before
+- Run the migration `dotnet watch run`, all seed data will be loaded into the postgres in docker
 
 ### Setup Heroku
 
@@ -262,3 +263,38 @@
 - Add environment variables: run `dotnet user-secrets list`, add the to _Config Vars_ in Heroku
 - When adding JWT secret to Heroku, make sure it is different from that in _appsettings.Development.json_
 - For DB connection string, update the `services.AddDbContext` method in _startup.cs_, to use env var from Heroku
+- Commit the latest changes, make sure _wwwroot_ folder is tracked
+- Run `git push heroku`, this will deploy the app to Heroku
+- URL: https://re-store-88.herokuapp.com
+
+### Add Stripe webhook
+
+- Login into Stripe -> Developers -> Webhooks -> Add an Endpoint
+- Add Endpoint URL: https://re-store-88.herokuapp.com/api/payment/webhook
+- Click **Select events**, select `charge.succeeded`, the app will listen for this event
+- Once the webhook endpoint is added, copy the new **Signing Secret** and paste it to the Heroku env var `StripeSettings:WhSecret`
+
+### Trouble shooting
+
+- Go the the Heroku dashboard and view logs, replicate the problem while the logs window is open
+- If something is wrong about payment, go to check Stripe -> Developers tab -> events
+
+### Connect GitHub to Heroku
+
+- Go to Heroku -> re-store -> Deploy tab -> Deployment method
+- Select GitHub, and a popup window will show up and setup connection to the _re-store_ repo in GitHub
+- Once setup, any update in **master** branch on GitHub will trigger a new redeployment on Heroku
+- From now on, new features should be added to a new local branch, and merge PR on GitHub
+
+## Admin role and CRUD operations
+
+### Add admin features
+
+- Create a new branch: `git checkout -b Inventory`
+- In _ProductsController.cs_, add an admin-only route handler `CreateProduct`, guard it with `[Authorize(Roles = "Admin")]`
+
+### Add automapper
+
+- AutoMapper is used to map `Product` to `ProductDto` automatically
+- Open Nuget Gallery, search for automapper, install `AutoMapper.Extensions.Microsoft.DependencyInjection`
+- 

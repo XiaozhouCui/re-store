@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Http;
 
 namespace API.DTOs
 {
-    public class CreateProductDto
+    public class UpdateProductDto
     {
+        public int Id { get; set; }
+
         [Required] // validation
         public string Name { get; set; }
 
@@ -16,7 +18,7 @@ namespace API.DTOs
         [Range(100, Double.PositiveInfinity)] // price must not be less than $1.00
         public long Price { get; set; }
 
-        public IFormFile PictureUrl { get; set; } // for uploading file from browser
+        public IFormFile PictureUrl { get; set; } // for uploading file from browser (optional)
 
         [Required]
         public string Type { get; set; }

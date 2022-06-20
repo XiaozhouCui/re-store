@@ -81,10 +81,31 @@ namespace API.Controllers
 
             var result = await _context.SaveChangesAsync() > 0;
 
-            // after creating a new resource, return the resource route (api/products/:id) to client
+            // after creating a new resource, return the resource route (api/products/{id}) to client
             if (result) return CreatedAtRoute("GetProduct", new { Id = product.Id }, product);
             // if failed, return 400
             return BadRequest(new ProblemDetails { Title = "Problem creating new product" });
+        }
+
+        // only admin user can update a product
+        [Authorize(Roles = "Admin")]
+        [HttpPut] // no "{id}" required, Id is laready included in UpdateProductDto
+        public async Task<ActionResult> UpdateProduct(UpdateProductDto productDto)
+        {
+            // find product by Id from DTO
+            var product = await _context.Products.FindAsync(productDto.Id);
+
+            if (product == null) return NotFound();
+
+            // EF will track changes in productDto and save it to product
+            _mapper.Map(productDto, product);
+
+            var result = await _context.SaveChangesAsync() > 0;
+
+            // for HttpPut, typically return NoContent (204)
+            if (result) return NoContent();
+
+            return BadRequest(new ProblemDetails { Title = "Problem updating product" });
         }
     }
 }

@@ -1,3 +1,9 @@
+## General info
+
+- This doc is to keep track of non-code procedures for this app
+- Key info can be found in the summary at then end of each section
+- All installed Nuget Packages and their versions can be found in _API.csproj_
+
 ## Initialise the project
 
 ### Initialise project with dotnet CLI
@@ -297,4 +303,5 @@
 
 - AutoMapper is used to map `Product` to `ProductDto` automatically
 - Open Nuget Gallery, search for automapper, install `AutoMapper.Extensions.Microsoft.DependencyInjection`
-- 
+- Create a helper class _API/RequestHelpers/MappingProfiles.cs_
+- Add AutoMapper to _Startup.cs_, then it can be injected into `ProductController`

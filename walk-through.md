@@ -1,7 +1,7 @@
-## General info
+## Summary
 
-- This doc is to keep track of non-code procedures for this app
-- Key info can be found in the summary at then end of each section
+- This doc is to keep track of non-code procedures for building this app from scratch
+- Key info can be found in the summary video at the end of each section
 - All installed Nuget Packages and their versions can be found in _API.csproj_
 - To check locally saved secrets (not on GitHub repo), run `dotnet user-secrets list`
 
@@ -314,4 +314,10 @@
 - Save them into `user-secrets` in localhost, example: `dotnet user-secrets set "Cloudinary:CloudName" "<your_cloud_name>"`
 - Go to Nuget Gallery, search for _cloudinary_ and install `CloudinaryDotNet` to API.csproj
 - Create a new service _ImageService.cs_ to integrate Cloudinary
-- Add ImageService to _Startup.cs_, so that it can be injected
+- Add ImageService to _Startup.cs_, so that it can be injected into `ProductController`
+
+### Update Product entity and run migration
+
+- Add a new property (column) `PublicId` in entity class _Product.cs_, to reference uploaded images
+- Create a new migration: `dotnet ef mimgrations add PublicIdAdded`
+- Run migration `dotnet watch run`, new column should be added to the Products table

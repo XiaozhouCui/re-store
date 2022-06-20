@@ -3,6 +3,7 @@
 - This doc is to keep track of non-code procedures for this app
 - Key info can be found in the summary at then end of each section
 - All installed Nuget Packages and their versions can be found in _API.csproj_
+- To check locally saved secrets (not on GitHub repo), run `dotnet user-secrets list`
 
 ## Initialise the project
 
@@ -302,6 +303,15 @@
 ### Add automapper
 
 - AutoMapper is used to map `Product` to `ProductDto` automatically
-- Open Nuget Gallery, search for automapper, install `AutoMapper.Extensions.Microsoft.DependencyInjection`
+- Open Nuget Gallery, search for _automapper_, install `AutoMapper.Extensions.Microsoft.DependencyInjection`
 - Create a helper class _API/RequestHelpers/MappingProfiles.cs_
 - Add AutoMapper to _Startup.cs_, then it can be injected into `ProductController`
+
+### Integrate Cloudinary
+
+- Cloudinary is used to store uploaded pictures
+- Login to Cloudinary, grab `CloudName`, `ApiKey`, and `ApiSecret`
+- Save them into `user-secrets` in localhost, example: `dotnet user-secrets set "Cloudinary:CloudName" "<your_cloud_name>"`
+- Go to Nuget Gallery, search for _cloudinary_ and install `CloudinaryDotNet` to API.csproj
+- Create a new service _ImageService.cs_ to integrate Cloudinary
+- Add ImageService to _Startup.cs_, so that it can be injected

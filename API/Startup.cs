@@ -143,6 +143,8 @@ namespace API
             services.AddScoped<TokenService>();
             // PaymentService will be injected into PaymentController
             services.AddScoped<PaymentService>();
+            // add Cloudinary service for injection
+            services.AddScoped<ImageService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline. (Middleware)

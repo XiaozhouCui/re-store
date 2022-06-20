@@ -107,5 +107,23 @@ namespace API.Controllers
 
             return BadRequest(new ProblemDetails { Title = "Problem updating product" });
         }
+
+        // only admin user can delete a product
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteProduct(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+
+            if (product == null) return NotFound();
+
+            _context.Products.Remove(product); // need to save changes to persist to DB
+
+            var result = await _context.SaveChangesAsync() > 0;
+
+            if (result) return Ok();
+
+            return BadRequest(new ProblemDetails { Title = "Problem deleting product" });
+        }
     }
 }

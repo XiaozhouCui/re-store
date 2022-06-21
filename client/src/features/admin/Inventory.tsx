@@ -16,12 +16,33 @@ import useProducts from '../../app/hooks/useProducts';
 import AppPagination from '../../app/components/AppPagination';
 import { useAppDispatch } from '../../app/store/configureStore';
 import { setPageNumber } from '../catalog/catalogSlice';
+import { useState } from 'react';
+import ProductForm from './ProductForm';
+import { Product } from '../../app/models/product';
 
 export default function Inventory() {
-  // use custom hook to get products
+  // use custom hook to get products and pagination metadata
   const { products, metaData } = useProducts();
 
   const dispatch = useAppDispatch();
+
+  const [editMode, setEditMode] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(undefined);
+
+  // click Edit button
+  const handleSelectProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setEditMode(true);
+  };
+
+  const cancelEdit = () => {
+    // de-select product
+    if (selectedProduct) setSelectedProduct(undefined);
+    setEditMode(false);
+  };
+
+  if (editMode)
+    return <ProductForm product={selectedProduct} cancelEdit={cancelEdit} />;
 
   return (
     <>
@@ -29,7 +50,12 @@ export default function Inventory() {
         <Typography sx={{ p: 2 }} variant="h4">
           Inventory
         </Typography>
-        <Button sx={{ m: 2 }} size="large" variant="contained">
+        <Button
+          sx={{ m: 2 }}
+          onClick={() => setEditMode(true)}
+          size="large"
+          variant="contained"
+        >
           Create
         </Button>
       </Box>
@@ -72,7 +98,7 @@ export default function Inventory() {
                 <TableCell align="center">{product.brand}</TableCell>
                 <TableCell align="center">{product.quantityInStock}</TableCell>
                 <TableCell align="right">
-                  <Button startIcon={<Edit />} />
+                  <Button onClick={() => handleSelectProduct(product)} startIcon={<Edit />} />
                   <Button startIcon={<Delete />} color="error" />
                 </TableCell>
               </TableRow>

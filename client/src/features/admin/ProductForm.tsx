@@ -45,11 +45,17 @@ const ProductForm = ({ product, cancelEdit }: Props) => {
           />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <AppTextInput control={control} name="price" label="Price" />
+          <AppTextInput
+            control={control}
+            type="number"
+            name="price"
+            label="Price"
+          />
         </Grid>
         <Grid item xs={12} sm={6}>
           <AppTextInput
             control={control}
+            type="number"
             name="quantityInStock"
             label="Quantity in Stock"
           />
@@ -57,6 +63,8 @@ const ProductForm = ({ product, cancelEdit }: Props) => {
         <Grid item xs={12}>
           <AppTextInput
             control={control}
+            multiline={true}
+            rows={4}
             name="description"
             label="Description"
           />

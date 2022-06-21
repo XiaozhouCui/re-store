@@ -35,6 +35,7 @@ export default function Inventory() {
     setEditMode(true);
   };
 
+  // click Cancel button in product edit form
   const cancelEdit = () => {
     // de-select product
     if (selectedProduct) setSelectedProduct(undefined);

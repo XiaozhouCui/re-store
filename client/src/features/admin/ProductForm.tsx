@@ -6,6 +6,8 @@ import AppSelectList from '../../app/components/AppSelectList';
 import AppTextInput from '../../app/components/AppTextInput';
 import useProducts from '../../app/hooks/useProducts';
 import { Product } from '../../app/models/product';
+import { yupResolver } from '@hookform/resolvers/yup'
+import { validationSchema } from './productValidation';
 
 interface Props {
   product?: Product;
@@ -13,7 +15,9 @@ interface Props {
 }
 
 const ProductForm = ({ product, cancelEdit }: Props) => {
-  const { control, reset, handleSubmit, watch } = useForm();
+  const { control, reset, handleSubmit, watch } = useForm({
+    resolver: yupResolver(validationSchema)
+  });
   const { brands, types } = useProducts();
   // watchFile is to preview the uploaded image, "file" is the name of dropzone
   const watchFile = watch('file', null);

@@ -6,8 +6,12 @@ import AppSelectList from '../../app/components/AppSelectList';
 import AppTextInput from '../../app/components/AppTextInput';
 import useProducts from '../../app/hooks/useProducts';
 import { Product } from '../../app/models/product';
-import { yupResolver } from '@hookform/resolvers/yup'
+import { yupResolver } from '@hookform/resolvers/yup';
 import { validationSchema } from './productValidation';
+import agent from '../../app/api/agent';
+import { useAppDispatch } from '../../app/store/configureStore';
+import { setProduct } from '../catalog/catalogSlice';
+import { LoadingButton } from '@mui/lab';
 
 interface Props {
   product?: Product;
@@ -15,19 +19,47 @@ interface Props {
 }
 
 const ProductForm = ({ product, cancelEdit }: Props) => {
-  const { control, reset, handleSubmit, watch } = useForm({
-    resolver: yupResolver(validationSchema)
+  const {
+    control,
+    reset,
+    handleSubmit,
+    watch,
+    formState: { isDirty, isSubmitting },
+  } = useForm({
+    resolver: yupResolver(validationSchema),
   });
   const { brands, types } = useProducts();
   // watchFile is to preview the uploaded image, "file" is the name of dropzone
   const watchFile = watch('file', null);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
-    if (product) reset(product);
-  }, [product, reset]);
+    // reset the product if form is not dirty and there is no watchFile
+    if (product && !watchFile && !isDirty) reset(product);
+    // remove watchFile when component is destroyed/unmounted
+    return () => {
+      // remove the file
+      if (watchFile) URL.revokeObjectURL(watchFile.preview);
+    };
+  }, [isDirty, product, reset, watchFile]);
 
-  const handleSubmitData = (data: FieldValues) => {
-    console.log(data);
+  const handleSubmitData = async (data: FieldValues) => {
+    try {
+      let response: Product; // product from API
+      if (product) {
+        // admin updating an existing product
+        response = await agent.Admin.updateProduct(data);
+      } else {
+        // admin crerating a new product
+        response = await agent.Admin.createProduct(data);
+      }
+      // update catalog state
+      dispatch(setProduct(response));
+      // leave the form
+      cancelEdit();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -108,9 +140,14 @@ const ProductForm = ({ product, cancelEdit }: Props) => {
           <Button onClick={cancelEdit} variant="contained" color="inherit">
             Cancel
           </Button>
-          <Button type="submit" variant="contained" color="success">
+          <LoadingButton
+            loading={isSubmitting}
+            type="submit"
+            variant="contained"
+            color="success"
+          >
             Submit
-          </Button>
+          </LoadingButton>
         </Box>
       </form>
     </Box>

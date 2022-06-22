@@ -58,6 +58,9 @@ axios.interceptors.response.use(
       case 401:
         toast.error(data.title);
         break;
+      case 403:
+        toast.error('You are not allowed to do that!');
+        break;
       case 500:
         // pass data to ServerError component as props "history/location"
         history.push({

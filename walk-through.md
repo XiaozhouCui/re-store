@@ -1,3 +1,10 @@
+## Summary
+
+- This doc is to keep track of non-code procedures for building this app from scratch
+- Key info can be found in the summary video at the end of each section
+- All installed Nuget Packages and their versions can be found in _API.csproj_
+- To check locally saved secrets (not on GitHub repo), run `dotnet user-secrets list`
+
 ## Initialise the project
 
 ### Initialise project with dotnet CLI
@@ -196,8 +203,9 @@
 
 ### Get webhook signing secret
 
-- Run `stripe listen`, it will give a webhook signing secret
+- Run `stripe listen`, it will give a webhook **Signing Secret** for localhost
 - Copy the key and paste it to _appsettings.json_ as `WhSecret` under `StripeSettings`
+- Once the app is deployed, a new **Signing Secret** will be provided and then be added as environment variable in Heroku
 
 ### Integrate webhook in API
 
@@ -242,7 +250,7 @@
 - In Startup.cs, update the `services.AddDbContext()` by adding `opt.UseNpgsql()`
 - Remove the _Migrations_ folder completely, as they were for SQLite
 - Create a clean migration: `dotnet ef migrations add PostgresInitial -o Data/Migrations`
-- Run the migration `dotnet watch run`, everything should work as before
+- Run the migration `dotnet watch run`, all seed data will be loaded into the postgres in docker
 
 ### Setup Heroku
 
@@ -262,3 +270,54 @@
 - Add environment variables: run `dotnet user-secrets list`, add the to _Config Vars_ in Heroku
 - When adding JWT secret to Heroku, make sure it is different from that in _appsettings.Development.json_
 - For DB connection string, update the `services.AddDbContext` method in _startup.cs_, to use env var from Heroku
+- Commit the latest changes, make sure _wwwroot_ folder is tracked
+- Run `git push heroku`, this will deploy the app to Heroku
+- URL: https://re-store-88.herokuapp.com
+
+### Add Stripe webhook
+
+- Login into Stripe -> Developers -> Webhooks -> Add an Endpoint
+- Add Endpoint URL: https://re-store-88.herokuapp.com/api/payment/webhook
+- Click **Select events**, select `charge.succeeded`, the app will listen for this event
+- Once the webhook endpoint is added, copy the new **Signing Secret** and paste it to the Heroku env var `StripeSettings:WhSecret`
+
+### Trouble shooting
+
+- Go the the Heroku dashboard and view logs, replicate the problem while the logs window is open
+- If something is wrong about payment, go to check Stripe -> Developers tab -> events
+
+### Connect GitHub to Heroku
+
+- Go to Heroku -> re-store -> Deploy tab -> Deployment method
+- Select GitHub, and a popup window will show up and setup connection to the _re-store_ repo in GitHub
+- Once setup, any update in **master** branch on GitHub will trigger a new redeployment on Heroku
+- From now on, new features should be added to a new local branch, and merge PR on GitHub
+
+## Admin role and CRUD operations
+
+### Add admin features
+
+- Create a new branch: `git checkout -b Inventory`
+- In _ProductsController.cs_, add an admin-only route handler `CreateProduct`, guard it with `[Authorize(Roles = "Admin")]`
+
+### Add automapper
+
+- AutoMapper is used to map `Product` to `ProductDto` automatically
+- Open Nuget Gallery, search for _automapper_, install `AutoMapper.Extensions.Microsoft.DependencyInjection`
+- Create a helper class _API/RequestHelpers/MappingProfiles.cs_
+- Add AutoMapper to _Startup.cs_, then it can be injected into `ProductController`
+
+### Integrate Cloudinary
+
+- Cloudinary is used to store uploaded pictures
+- Login to Cloudinary, grab `CloudName`, `ApiKey`, and `ApiSecret`
+- Save them into `user-secrets` in localhost, example: `dotnet user-secrets set "Cloudinary:CloudName" "<your_cloud_name>"`
+- Go to Nuget Gallery, search for _cloudinary_ and install `CloudinaryDotNet` to API.csproj
+- Create a new service _ImageService.cs_ to integrate Cloudinary
+- Add ImageService to _Startup.cs_, so that it can be injected into `ProductController`
+
+### Update Product entity and run migration
+
+- Add a new property (column) `PublicId` in entity class _Product.cs_, to reference uploaded images
+- Create a new migration: `dotnet ef mimgrations add PublicIdAdded`
+- Run migration `dotnet watch run`, new column should be added to the Products table

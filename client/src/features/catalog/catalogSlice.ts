@@ -127,6 +127,19 @@ export const catalogSlice = createSlice({
     setMetaData: (state, action) => {
       state.metaData = action.payload;
     },
+    // for admin to add/update product
+    setProduct: (state, action) => {
+      // productsAdapter will have all the methods to work on products array
+      productsAdapter.upsertOne(state, action.payload);
+      // force the reload of all products after add/update
+      state.productsLoaded = false;
+    },
+    // for admin to delete a product
+    removeProduct: (state, action) => {
+      productsAdapter.removeOne(state, action.payload); // payload is product ID
+      // force the reload of all products after removal
+      state.productsLoaded = false;
+    },
   },
   // extraReducers are required for createAsyncThunk
   extraReducers: (builder) => {
@@ -182,4 +195,6 @@ export const {
   resetProductParams,
   setMetaData,
   setPageNumber,
+  setProduct,
+  removeProduct,
 } = catalogSlice.actions;

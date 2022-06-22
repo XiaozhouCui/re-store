@@ -1,9 +1,13 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using API.RequestHelpers;
+using API.Services;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,8 +16,12 @@ namespace API.Controllers
     public class ProductsController : BaseApiController
     {
         private readonly StoreContext _context;
-        public ProductsController(StoreContext context)
+        private readonly IMapper _mapper;
+        private readonly ImageService _imageService;
+        public ProductsController(StoreContext context, IMapper mapper, ImageService imageService)
         {
+            _imageService = imageService;
+            _mapper = mapper;
             _context = context;
         }
 
@@ -39,8 +47,9 @@ namespace API.Controllers
 
             return products;
         }
+
         // Get product by ID
-        [HttpGet("{id}")] // api/products/3
+        [HttpGet("{id}", Name = "GetProduct")] // api/products/3
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
             var product = await _context.Products.FindAsync(id);
@@ -49,7 +58,8 @@ namespace API.Controllers
 
             return product;
         }
-        // get filter options for client to select and filter
+
+        // get filter options for client to select and filter products
         [HttpGet("filters")]
         // IActionResult will have all HTTP responses, e.g. NotFound(), OK()
         public async Task<IActionResult> GetFilters()
@@ -60,6 +70,91 @@ namespace API.Controllers
             var types = await _context.Products.Select(p => p.Type).Distinct().ToListAsync();
             // return an anonymous object
             return Ok(new { brands, types });
+        }
+
+        // only admin user can add a new product
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<ActionResult<Product>> CreateProduct([FromForm] CreateProductDto productDto)
+        {
+            // map ProductDto to Product
+            var product = _mapper.Map<Product>(productDto);
+
+            // save the uploaded image to Cloudinary
+            if (productDto.File != null)
+            {
+                var imageResult = await _imageService.AddImageAsync(productDto.File);
+
+                if (imageResult.Error != null) return BadRequest(new ProblemDetails { Title = imageResult.Error.Message });
+
+                product.PictureUrl = imageResult.SecureUrl.ToString(); // image URL with https
+                product.PublicId = imageResult.PublicId;
+            }
+
+            _context.Products.Add(product);
+
+            var result = await _context.SaveChangesAsync() > 0;
+
+            // after creating a new resource, return the resource route (api/products/{id}) to client
+            if (result) return CreatedAtRoute("GetProduct", new { Id = product.Id }, product);
+            // if failed, return 400
+            return BadRequest(new ProblemDetails { Title = "Problem creating new product" });
+        }
+
+        // only admin user can update a product
+        [Authorize(Roles = "Admin")]
+        [HttpPut] // no "{id}" required, Id is laready included in UpdateProductDto
+        public async Task<ActionResult<Product>> UpdateProduct([FromForm]UpdateProductDto productDto)
+        {
+            // find product by Id from DTO
+            var product = await _context.Products.FindAsync(productDto.Id);
+
+            if (product == null) return NotFound();
+
+            // EF will track changes in productDto and save it to product
+            _mapper.Map(productDto, product);
+
+            // Add new image to and remove old one from Cloudinary
+            if (productDto.File != null)
+            {
+                var imageResult = await _imageService.AddImageAsync(productDto.File);
+
+                if (imageResult.Error != null) return BadRequest(new ProblemDetails { Title = imageResult.Error.Message });
+
+                // delete the existing image from Cloudinary
+                if (!string.IsNullOrEmpty(product.PublicId)) await _imageService.DeleteImageAsync(product.PublicId);
+
+                product.PictureUrl = imageResult.SecureUrl.ToString(); // image URL with https
+                product.PublicId = imageResult.PublicId; // update the PublicId in Products table
+            }
+
+            var result = await _context.SaveChangesAsync() > 0;
+
+            // return the updated product back to client
+            if (result) return Ok(product);
+
+            return BadRequest(new ProblemDetails { Title = "Problem updating product" });
+        }
+
+        // only admin user can delete a product
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteProduct(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+
+            if (product == null) return NotFound();
+
+            // delete the existing image from Cloudinary
+            if (!string.IsNullOrEmpty(product.PublicId)) await _imageService.DeleteImageAsync(product.PublicId);
+
+            _context.Products.Remove(product); // need to save changes to persist to DB
+
+            var result = await _context.SaveChangesAsync() > 0;
+
+            if (result) return Ok();
+
+            return BadRequest(new ProblemDetails { Title = "Problem deleting product" });
         }
     }
 }

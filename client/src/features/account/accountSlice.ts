@@ -73,7 +73,16 @@ export const accountSlice = createSlice({
     },
     // add user to state (from local storage)
     setUser: (state, action) => {
-      state.user = action.payload;
+      // use "atob" to get JWT payload (mid section) into JSON
+      let claims = JSON.parse(atob(action.payload.token.split('.')[1]));
+        // JWT payload object has a key "http://schemas..." for roles, it comes from .NET Identity
+      let roles =
+        claims['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+      state.user = {
+        ...action.payload,
+        // if a user has multiple roles they will come as an array, while single role comes as a string
+        roles: typeof roles === 'string' ? [roles] : roles,
+      };
     },
   },
   // using createAsyncThunk will require extra reducers
@@ -89,7 +98,18 @@ export const accountSlice = createSlice({
     builder.addMatcher(
       isAnyOf(signInUser.fulfilled, fetchCurrentUser.fulfilled),
       (state, action) => {
-        state.user = action.payload;
+        // use "atob" to get JWT payload (mid section) into JSON
+        let claims = JSON.parse(atob(action.payload.token.split('.')[1]));
+        // JWT payload object has a key "http://schemas..." for roles, it comes from .NET Identity
+        let roles =
+          claims[
+            'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
+          ];
+        state.user = {
+          ...action.payload,
+          // if a user has multiple roles they will come as an array, while single role comes as a string
+          roles: typeof roles === 'string' ? [roles] : roles,
+        };
       }
     );
     builder.addMatcher(isAnyOf(signInUser.rejected), (state, action) => {

@@ -339,6 +339,7 @@
 - In VS Code, upgrade the C# extension, so that omnisharp is compatible with .NET 6
 
 ### 14.2 App setup
+
 - In _API.csproj_, update TargetFramework from `net5.0` to `net6.0`
 - In _API.csproj_, update the related packages (e.g. Microsoft.EntityFrameworkCore.Design) to the latest version for .NET 6
 - Once versions are updated, run `dotnet restore`
@@ -346,5 +347,14 @@
 
 ### 14.3 Fix warnings and errors
 
-- To fix the warning, in *Order.cs* add `[Required]` to the `ShippingAddress` attribute
+- To fix the warning, in _Order.cs_ add `[Required]` to the `ShippingAddress` attribute
 - For Postgres format issue, update the `DateTime.Now` to `DataTime.UtcNow`
+
+### 14.4 Apply .NET 6 minimal hosting model
+
+- .NET 6 removed some boiler plates, DI container and middlewares now moved from _Startup.cs_ into _Program.cs_
+- _Program.cs_ now uses `builder.Services` to add services to the Dependency Injection container
+- _Program.cs_ uses `builder.Build()` to return a configured application `app`, which can be used to add middlewares
+- Delete the *Startup.cs* file
+- Move all the usings from _Program.cs_ into _GlobalUsings.cs_
+- Remove unused usings from other cs files
